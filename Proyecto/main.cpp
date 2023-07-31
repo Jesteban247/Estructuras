@@ -128,9 +128,62 @@ int main()
                 }
             }
 
+             //Ayuda
+
+            else if (tokens[0] == "ayuda")
+            {
+                if (tokens.size() > 1)
+                {
+                    cout << "El comando 'ayuda' no debe tener argumentos adicionales." << endl;
+                }
+                else
+                {
+                    int ans;
+                    ans= menu_ayuda();
+                    if (ans == 1) 
+                    {
+                        void inicializar();
+                    } 
+                    
+                    else if (ans == 2) 
+                    {
+                        void turno();
+                    } 
+
+                    else if (ans == 3) 
+                    {
+                        void guardar();
+                    } 
+
+                    else if (ans == 4) 
+                    {
+                        void guardar_comprimido();
+                    } 
+
+                    else if (ans == 5) 
+                    {
+                        void inicializar_nombre_archivo();
+                    } 
+
+                    else if (ans == 6) 
+                    {
+                        void costo_conquista();
+                    } 
+
+                    else if (ans == 7) 
+                    {
+                        void conquista_mas_barata();
+                    } 
+
+                    else 
+                    {
+                        std::cout << "ans no es igual a ningún número del 1 al 8" << std::endl;
+                    }
+
+                }
+            }
             
             //Comprobar
-
             else
             {
                 cout << "Comando no reconocido." << endl;
