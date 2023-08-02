@@ -3,14 +3,13 @@
 #include <sstream>
 #include <vector>
 
-#include <limits>
 #include "ayuda.h"
 
 using namespace std;
 
-int menu_ayuda()
+void menu_ayuda()
 {
-    cout << "Ayda" <<endl;
+    cout << "Comandos disponibles" <<endl;
     cout << "1: inicializar" <<endl;
     cout << "2: turno" <<endl;
     cout << "3: guardar" <<endl;
@@ -18,13 +17,8 @@ int menu_ayuda()
     cout << "5: inicializar _nombre_archivo" <<endl;
     cout << "6: costo_conquista" <<endl;
     cout << "7: conquista_mas_barata" <<endl;
-    cout << "8: salir" <<endl;
 
-    cout << "Que quiere ver:";
-    int respuesta;
-    cin >> respuesta;
-
-    return respuesta;
+    cout << "Para mayor ayuda escriba: ayuda <comando>" <<endl;
 }
 
 
@@ -155,60 +149,57 @@ int main()
 
             else if (tokens[0] == "ayuda")
             {
-                if (tokens.size() > 1)
+                if (tokens.size() > 3)
                 {
                     cout << "El comando 'ayuda' no debe tener argumentos adicionales." << endl;
                 }
                 else
                 {
-                    int ans;
-                    ans= menu_ayuda();
-                    if (ans == 1) 
+                    if (tokens.size() == 1)
+                    {
+                        menu_ayuda();
+                    }
+                    
+                    else if (tokens[1] == "inicializar") 
                     {
                         inicializar();
                     } 
                     
-                    else if (ans == 2) 
+                    else if (tokens[1] == "turno") 
                     {
                         turno();
                     } 
 
-                    else if (ans == 3) 
+                    else if (tokens[1] == "guardar")  
                     {
                         guardar();
                     } 
 
-                    else if (ans == 4) 
+                    else if (tokens[1] == "guardar_comprimido") 
                     {
                         guardar_comprimido();
                     } 
 
-                    else if (ans == 5) 
+                    else if (tokens[1] == "inicializar_nombre_archivo")  
                     {
                         inicializar_nombre_archivo();
                     } 
 
-                    else if (ans == 6) 
+                    else if (tokens[1] == "costo_conquista") 
                     {
                         costo_conquista();
                     } 
 
-                    else if (ans == 7) 
+                    else if (tokens[1] == "conquista_mas_barata")
                     {
                         conquista_mas_barata();
                     } 
 
-                    else if (ans == 8)
+                    else
                     {
-                        cout << "Bye :)" <<endl;
+                        cout << " Digito mal,Bye :)" <<endl;
                     }
 
-                    else 
-                    {
-                        cout << "ans no es igual a ningún número del 1 al 8" << std::endl;
-                    }
-
-                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 }
             }
             
