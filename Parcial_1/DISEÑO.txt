@@ -1,0 +1,45 @@
+DISEÑO:
+
+TAD TRABAJO
+
+Datos mínimos:
+- Identificador (entero sin signo)
+
+Operaciones:
+//mmm es buena practica no?
+- Trabajo(): Constructor por defecto que inicializa el identificador del trabajo.
+- Trabajo(unsigned int identificador): Constructor que permite inicializar el identificador del trabajo con el valor proporcionado.
+- getIdentificador(): Retorna el valor del identificador del trabajo.
+- setIdentificador(unsigned int identificador): Permite cambiar el valor del identificador del trabajo por el valor proporcionado.
+
+
+TAD ACTIVIDAD
+
+Datos mínimos:
+- Día (entero sin signo)
+- Título (cadena de caracteres)
+- Hora de inicio (entero sin signo)
+- Duración (entero sin signo)
+- Tipo (cadena de caracteres)
+- Cola de trabajos (cola de objetos Trabajo)
+
+Operaciones:
+- Actividad(unsigned int dia, std::string titulo, unsigned int hora_inicio, unsigned int duracion, std::string tipo): Constructor que inicializa los atributos de la actividad.
+- Métodos de acceso y modificación para cada atributo (getters y setters).
+- agregarTrabajo(unsigned int dia, std::string titulo, unsigned int hora_inicio, unsigned int duracion, std::string tipo, unsigned int id): Agrega un nuevo trabajo a la cola de trabajos si la actividad existe y el trabajo no está repetido.
+- mostrarTrabajo(): Muestra los identificadores de los trabajos en la cola.
+- mostrarActividad(): Muestra la información de la actividad, incluyendo sus detalles y la lista de trabajos asociados.
+
+
+MAIN (Lo coloco opcional)
+
+
+LOGICA:
+
+1. La función comienza verificando si la actividad a la que se intenta agregar el trabajo existe. Esto se hace comparando los parámetros recibidos (los propios de actividad) con las propiedades de la actividad en la que se encuentra la función. Si alguno de los valores es diferente, se imprime "La actividad no existe" y la función retorna, sin realizar ninguna acción adicional.
+
+2. Si los detalles de la actividad coinciden con los valores almacenados en la instancia, la función procede a verificar si el trabajo con el mismo ID ya existe en la cola de trabajos asociada a la actividad. Para hacer esto, se crea una copia de la cola de trabajo (`cola_trabajo_aux`) para no afectar la original.
+
+3. Luego, la función itera a través de cada trabajo en la cola auxiliar y compara el ID del trabajo actual con el ID pasado como argumento. Si se encuentra un trabajo con el mismo ID, se imprime "El trabajo ya existe" y la función retorna sin agregar el trabajo nuevo.
+
+4. Si no se encuentra ningún trabajo con el mismo ID en la cola auxiliar, se procede a agregar el nuevo trabajo. 
