@@ -1,0 +1,174 @@
+﻿Estructuras de Datos
+Primer Parcial
+
+1. Análisis de código
+
+1.1 Cuenta la cantidad de 0, 1 y 2 en cada sublista.
+1.2 O(n^2), el primer ciclo se repite n veces, y el segundo ciclo, que está anidado, se repite m veces, que puede generalizarse a n también (porque dependerá de la longitud de cada sublista).
+
+2. Selección múltiple con única respuesta
+
+2.1 2) algoritmo 2 con O(n^2).
+2.2 4) ninguna de las anteriores.
+
+3. Diseño e Implementación de TADs
+
+3.1 Diseño
+
+TAD Dulce
+Datos mínimos:
+  - nombre, cadena de caracteres, identifica de forma particular el dulce.
+  - sabor, cadena de caracteres, representa el sabor del dulce.
+  - identificador, cadena de caracteres, identifica con caracteres numéricos el dulce de forma única.
+Operaciones:
+  - Dulce(), crea un dulce con atributos vacíos (cadenas de tamaño 0).
+  - Dulce(nom, sab, id), crea una caja con los datos dados.
+  - FijarNombre(nnom), cambia el valor del nombre por nnom.
+  - FijarSabor(nsab), cambia el valor del sabor por nsab.
+  - FijarId(nid), cambia el valor del identificador por nid.
+  - ObtenerNombre(), retorna el nombre actual del dulce.
+  - ObtenerSabor(), retorna el sabor actual del dulce.
+  - ObtenerId(), retorna el identificador actual del dulce.
+
+TAD PaqueteDulces
+Datos mínimos:
+  - nombre, cadena de caracteres, identifica de forma particular la variedad de dulces del paquete.
+  - sabor, cadena de caracteres, representa el sabor de los dulces del paquete.
+  - cantidad, entero, cantidad de dulces que contiene el paquete.
+  - dulces, lista de Dulce, almacena los dulces en el paquete.
+Operaciones:
+  - PaqueteDulces(), crea un paquete de dulces con atributos vacíos.
+  - PaqueteDulces(nom, sab, cant, dul), crea un paquete de dulces con datos dados.
+  - FijarNombre(nnom), cambia el valor del nombre por nnom.
+  - FijarSabor(nsab), cambia el valor del sabor por nsab.
+  - FijarCantidad(ncant), cambia el valor de la cantidad por ncant.
+  - FijarDulces(ndul), cambia el valor de la lista de dulces por ndul.
+  - ObtenerNombre(), retorna el nombre actual del paquete de dulces.
+  - ObtenerSabor(), retorna el sabor actual del paquete de dulces.
+  - ObtenerCantidad(), retorna la cantidad actual de dulces en el paquete.
+  - ObtenerDulces(), retorna la lista actual de dulces en el paquete.
+  - AgregarDulce(ndulce), inserta un nuevo dulce en la lista de dulces del paquete. 
+
+TAD Tralala
+Datos mínimos:
+  - contA, pila de Dulce, representa el contenedor donde se almacenan los dulces producidos.
+  - bandas, vector de colas de Dulce, representa las bandas transportadoras donde se distribuyen los dulces.
+  - limites, vector de entero, representa los tamaños límite de cada banda transportadora.
+  - contB, lista de PaqueteDulces, representa el contendor donde se almacenan los paquetes de dulces.
+Operaciones:
+  - Tralala(), crea una estructura de empacado con datos vacíos.
+  - FijarContA(ncont), cambia el valor del contenedor A por ncont.
+  - FijarBandas(nband), cambia el valor del vector de bandas transportadoras a nband.
+  - FijarLimites(nlim), cambia el valor del vector de tamaños límite a nlim.
+  - FijarContB(ncont), cambia el valor del contenedor B por ncont.
+  - ObtenerContA(), retorna el contenedor A actual.
+  - ObtenerBandas(), retorna el vector actual de bandas transportadoras.
+  - ObtenerLimites(), retorna el vector actual de tamaños límite.
+  - ObtenerContB(), retorna el contenedor B actual.
+  - RepartirDulces(), toma los dulces ubicados en el contenedor A, y si éste está lleno (50 dulces), procede a ubicarlos en sus correspondientes bandas transportadoras.
+  - EmpaquetarDulces(), para cada banda transportadora que esté completa (llena), procede a ubicar los dulces en un paquete que se almacena en el contenedor B.
+
+
+
+3.2 Repartir los dulces del contenedor A
+
+// pasos a seguir:
+// - verificar que el contenedor A almacena 50 dulces.
+// - si es cierto, retirar uno por uno los dulces del contenedor, revisar el primer dígito de su identificador para ubicar la banda correspondiente, e insertarlo en la banda (si ésta tiene espacio todavía de acuerdo a su tamaño límite).
+// - retornar un valor booleano que indique si logró o no hacer el proceso.
+
+// 
+
+bool Tralala::RepartirDulces() {
+   bool realizado = false;
+
+   // verificar si hay 50 dulces en el contenedor A
+   if (contA.size() == 50) {
+      Dulce dulActual;
+      std::stack<Dulce> temp;
+
+      // repetir mientras hayan dulces en el contenedor
+      while (!contA.empty()) {
+
+         // extraer el dulce disponible
+         dulActual = contA.top();
+         contA.pop();
+
+         // extraer el primer dígito del identificador del dulce para saber qué banda le corresponde
+         indBanda = atoi(dulActual.identificador[0]);
+
+         // verificar si la banda correspondiente tiene aún espacio para almacenar el dulce
+         if (bandas[indBanda].size() < limites[indBanda]) {
+
+            // si hay espacio, insertar el dulce en la banda
+            bandas[indBanda].push(dulActual);
+         } else {
+
+            // si no hay espacio, guardar el dulce en una pila temporal
+            temp.push(dulActual);
+         }
+      }
+
+      // si la pila temporal tiene dulces, usarla para reemplazar el contenedor A (así los dulces no se pierden)
+      if (!temp.empty()) {
+         contA = temp;
+      }
+
+      realizado = true;
+   } 
+
+   return realizado;
+}
+
+
+3.3 Empaquetar los dulces de las bandas transportadoras
+
+// pasos a seguir:
+// - revisar cada una de las bandas transportadoras.
+// - para cada banda, revisar si su capacidad actual es igual al tamaño límite almacenado.
+// - si es cierto, retirar uno por uno los dulces de la banda e insertarlos en el contenedor del paquete de dulces, actualizar la información de los dulces en el paquete (nombre, sabor, cantidad), y ubicar el paquete de dulces en el contenedor B.
+// - retornar un valor booleano que indique si logró o no hacer el proceso al menos para una banda.
+
+bool Tralala::EmpaquetarDulces() {
+   bool realizado = false;
+
+   // revisar cada banda transportadora
+   std::vector< queue<Dulce> >::iterator itBanda;
+   std::vector< int >::iterator itLimite;
+   for (itBanda = bandas.begin(), itLimite = limites.begin(); itBanda != bandas.end(), itLimite != limites.end(); itBanda++, itLimite++) {
+
+      // revisar si la capacidad actual de la banda es igual al tamaño límite
+      if (itBanda->size() == *itLimite) {
+         Dulce dulActual;
+         PaqueteDulces paq;
+         
+         // repetir mientras hayan dulces en la banda
+         while(!itBanda->empty()) {
+
+            // extraer el dulce disponible
+            dulActual = itBanda->front();
+            itBanda->pop();
+
+            // insertarlo en la lista de dulces del paquete
+            paq.AgregarDulce(dulActual);
+         }
+
+         // definir los datos del paquete de dulces
+         paq.nombre = dulActual.nombre;
+         paq.sabor = dulActual.sabor;
+         paq.cantidad = (paq.dulces).size();
+
+         // insertar el paquete de dulces en el contenedor B
+         contB.push_back(paq);
+
+         realizado = true;
+      }
+   }
+
+   return realizado;
+}
+
+void PaqueteDulces::AgregarDulce( Dulce ndulce ) {
+  dulces.push_back(ndulce);
+}
+
