@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <time.h>
 
 #include "Help.h"
 #include "Country.h"
@@ -81,6 +82,7 @@ list <Data> load_data()
 
 int main()
 {
+    setlocale(LC_ALL, " ");
     string command;
     list <Country> countries;
     list <Data> info_close_countries;
