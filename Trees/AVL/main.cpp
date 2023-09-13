@@ -50,7 +50,7 @@ int main()
 
         if (opcion == 2)
         {
-            cout << "Ingrese el valor del nodo a eliminar: ";
+            cout << "Ingrese el valor a eliminar: ";
             int valor;
             cin >> valor;
 
