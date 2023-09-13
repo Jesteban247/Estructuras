@@ -256,6 +256,8 @@ template <class T>
 bool ArbolAVL<T>::insertar(const T& dato)
 {
     raiz = insertarRecursivo(raiz, dato);
+    // if(raiz==dato){return false;}
+    //else
     return true; // Reemplaza con la lógica adecuada
 }
 
