@@ -2,63 +2,73 @@
 #define ARBOLAVL_H
 
 #include "NodoAVL.h"
+#include <queue>
+#include <string>
 
 template <class T>
 class ArbolAVL
 {
-    protected:
-    NodoAVL<T> *raiz;
-
-    public:
+public:
+    // Constructor y destructor
     ArbolAVL();
     ~ArbolAVL();
+
+    // Métodos para verificar y obtener información
     bool esVacio() const;
     const T& obtenerDatoRaiz() const;
+    int altura();
+    int tamano();
 
+    // Métodos de impresión
+    void imprimirArbolGrafico();
+
+    // Métodos de búsqueda
+    bool buscar(T& val);
+
+    // Métodos de recorrido
+    void preOrden();
+    void inOrden();
+    void posOrden();
+    void nivelOrden();
+
+    // Métodos de inserción y eliminación
     bool insertar(const T& dato);
     bool eliminar(const T& dato);
 
-    void imprimirArbolGrafico(NodoAVL<T>* nodo, int nivel, const std::string& prefijo);
-    void imprimirArbolGrafico();
+private:
+    // Atributo de la clase
+    NodoAVL<T> *raiz;
 
-    bool buscar(T& val);
-    bool buscarRecursivo(NodoAVL<T>* nodo, T& val);
+    // Métodos privados para operaciones internas
 
-    int altura();
-    int calcularAltura(NodoAVL<T>* nodo);
+        // Métodos para verificar y obtener información
+        int Altura_arbol(NodoAVL<T>* nodo);
+        int calcularTamano(NodoAVL<T>* nodo);
 
-    int tamano();
-    int calcularTamano(NodoAVL<T>* nodo);
+        // Métodos de impresión
+        void imprimirArbolGrafico(NodoAVL<T>* nodo, int nivel, const std::string& prefijo);
 
-    void preOrdenRecursivo(NodoAVL<T>* nodo);
-    void preOrden();
+        // Métodos de búsqueda
+        bool buscarRecursivo(NodoAVL<T>* nodo, T& val);
 
-    void inOrdenRecursivo(NodoAVL<T>* nodo);
-    void inOrden();
+        // Métodos de recorrido
+        void preOrdenRecursivo(NodoAVL<T>* nodo);
+        void inOrdenRecursivo(NodoAVL<T>* nodo);
+        void posOrdenRecursivo(NodoAVL<T>* nodo);
 
-    void posOrdenRecursivo(NodoAVL<T>* nodo);
-    void posOrden();
-
-    void nivelOrden();
-
-    
-    NodoAVL<T>* insertarRecursivo(NodoAVL<T>* nodo, const T& dato);
-    NodoAVL<T>* eliminarRecursivo(NodoAVL<T>* nodo, const T& dato);
-    void balancear(NodoAVL<T>*& nodo);
-    int calcularAltura(NodoAVL<T>* nodo) const;
-    int calcularFactorEquilibrio(NodoAVL<T>* nodo) const;
-    NodoAVL<T>* rotacionDerecha(NodoAVL<T>* nodo);
-    NodoAVL<T>* rotacionIzquierda(NodoAVL<T>* nodo);
-    NodoAVL<T>* rotacionDerechaIzquierda(NodoAVL<T>* nodo);
-    NodoAVL<T>* rotacionIzquierdaDerecha(NodoAVL<T>* nodo);
-    void imprimirArbolGrafico(NodoAVL<T>* nodo, int nivel, const std::string& prefijo) const;
-    bool buscarRecursivo(const NodoAVL<T>* nodo, const T& val) const;
-    int calcularTamano(NodoAVL<T>* nodo) const;
-    void preOrdenRecursivo(const NodoAVL<T>* nodo) const;
-    void inOrdenRecursivo(const NodoAVL<T>* nodo) const;
-    void posOrdenRecursivo(const NodoAVL<T>* nodo) const;
+        // Métodos de inserción y eliminación
+        NodoAVL<T>* insertarRecursivo(NodoAVL<T>* nodo, const T& dato);
+        NodoAVL<T>* eliminarRecursivo(NodoAVL<T>* nodo, const T& dato);
+        void balancear(NodoAVL<T>*& nodo);
+        int calcularAltura(NodoAVL<T>* nodo) const;
+        int calcularFactorEquilibrio(NodoAVL<T>* nodo) const;
+        NodoAVL<T>* rotacionDerecha(NodoAVL<T>* nodo);
+        NodoAVL<T>* rotacionIzquierda(NodoAVL<T>* nodo);
+        NodoAVL<T>* rotacionDerechaIzquierda(NodoAVL<T>* nodo);
+        NodoAVL<T>* rotacionIzquierdaDerecha(NodoAVL<T>* nodo);
 };
 
 #include "ArbolAVL.hxx"
 
 #endif
+
