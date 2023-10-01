@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ArbolQuad.h"
+using namespace std;
 
 int main() {
     ArbolQuad quadtree;
@@ -41,6 +42,16 @@ int main() {
 
     std::cout << "Árbol Quadtree:" << std::endl;
     quadtree.imprimirArbol();
+
+    cout << "-------------------" << endl;
+    cout << "Busqueda de puntos Exacta" << endl;
+    punto p9 = {32, 30};
+    cout << "Busqueda de (32,25): " << quadtree.buscarExacto(p1) << endl;
+    cout << "-------------------" << endl;
+    cout << "Busqueda de puntos Cercanos" << endl;
+    cout << "Busqueda de (32,30): " << quadtree.buscarCercano(p9) << endl;
+
+
 
     return 0;
 }
