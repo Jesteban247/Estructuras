@@ -136,44 +136,10 @@ void ArbolKD::nivelOrden() const {
 }
 
 
-// Implementa la búsqueda exacta recursiva
-bool ArbolKD::buscarExactoRecursivo(punto val, NodoKD* nodoActual) {
-    if (nodoActual == nullptr) {
-        // El nodo actual es nulo, por lo que el valor no se encuentra en el árbol.
-        return false;
-    }
-
-    if (val == nodoActual->obtenerDato()) {
-        // Encontramos el valor exacto en el nodo actual.
-        return true;
-    }
-
-    int dim_actual = dimension % 2; // Determina la dimensión actual (0 para x, 1 para y)
-
-    if (dim_actual == 0) { // Si estamos en la dimensión x
-        if (val.x < nodoActual->obtenerDato().x) {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoIzq());
-        } else {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoDer());
-        }
-    } else { // Si estamos en la dimensión y
-        if (val.y < nodoActual->obtenerDato().y) {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoIzq());
-        } else {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoDer());
-        }
-    }
-}
-
-// Implementa la búsqueda exacta
-bool ArbolKD::buscarExacto(punto val) {
-    return buscarExactoRecursivo(val, raiz);
-}
 
 
-// Implementa la búsqueda cercana 
+// Implementa la búsqueda cercana e Implementa la función de distancia euclidiana
 
-// Implementa la función de distancia euclidiana
 double ArbolKD::distancia(punto p1, punto p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }

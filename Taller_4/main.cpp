@@ -104,12 +104,19 @@ int main(int argc, char* argv[]) {
             cout << "-------------------------" << endl;
             cout << "Parte 1(Quadtree):" << endl;
             clock_t init_time3 = std::clock( );
-            if (quadtree.buscarExacto(p)) {
-                cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
-            } else {
+            
+            punto x= quadtree.buscarCercano(p); 
+            if  (x.x != p.x && x.y != p.y)
+            {
                 cout << "El valor (" << p.x << ", " << p.y << ") no se encuentra en el árbol" << endl;
-                cout << "El valor más cercano es: " << quadtree.buscarCercano(p) << endl;
+                cout << "El valor más cercano es: " << x << endl;
             }
+            else
+            {
+                cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
+                cout << "El valor es: " << x << endl;
+            }
+
             clock_t end_time3 = std::clock( );
             double calc_time3 = ( end_time3 - init_time3 ) / double( CLOCKS_PER_SEC );
             cout << "Tiempo de ejecucion: " << calc_time3 << " segundos" << endl;
@@ -117,12 +124,19 @@ int main(int argc, char* argv[]) {
             cout << "-------------------------" << endl;
             cout << "Parte 2(Kdtree):" << endl;
             clock_t init_time4 = std::clock( );
-            if (kdtree.buscarExacto(p)) {
-                cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
-            } else {
+
+            punto y= kdtree.buscarCercano(p);
+            if  (y.x != p.x && y.y != p.y)
+            {
                 cout << "El valor (" << p.x << ", " << p.y << ") no se encuentra en el árbol" << endl;
-                cout << "El valor más cercano es: " << kdtree.buscarCercano(p) << endl;
+                cout << "El valor más cercano es: " << y << endl;
             }
+            else
+            {
+                cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
+                cout << "El valor es: " << y << endl;
+            }
+
             clock_t end_time4 = std::clock( );
             double calc_time4 = ( end_time4 - init_time4 ) / double( CLOCKS_PER_SEC );
             cout << "Tiempo de ejecucion: " << calc_time4 << " segundos" << endl;

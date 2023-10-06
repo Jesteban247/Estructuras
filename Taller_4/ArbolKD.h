@@ -24,10 +24,6 @@ public:
     void posOrden(NodoKD* nodo) const;
     void nivelOrden() const;
 
-    // Agrega una función de búsqueda exacta
-    bool buscarExacto(punto val);
-    bool buscarExactoRecursivo(punto val, NodoKD* nodoActual);
-
     // Agrega una función de búsqueda cercana
     punto buscarCercano(punto val);
     void buscarCercanoRecursivo(NodoKD* nodoActual, punto val, double& distanciaMinima, punto& puntoCercano, int dim);
