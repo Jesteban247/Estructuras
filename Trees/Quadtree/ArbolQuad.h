@@ -26,10 +26,6 @@ public:
 
     void imprimirArbol();
 
-    // Métodos para buscar un punto en el árbol
-    bool buscarExacto(punto val);
-    bool buscarExactoRecursivo(punto val, NodoQuad* nodoActual);
-
     // Métodos para buscar un punto cercano
     punto buscarCercano(punto val);
     void buscarCercanoRecursivo(NodoQuad* nodoActual, punto val, double& distanciaMinima, punto& puntoCercano);

@@ -170,39 +170,6 @@ void ArbolQuad::imprimirArbolRecursivo(NodoQuad* nodo, const std::string& prefij
     imprimirArbolRecursivo(nodo->obtenerHijoInfDer(), nuevoPrefijo, "SE");
 }
 
-//Buscar
-
-bool ArbolQuad::buscarExacto(punto val) {
-    return buscarExactoRecursivo(val, raiz);
-}
-
-bool ArbolQuad::buscarExactoRecursivo(punto val, NodoQuad* nodoActual) {
-    if (nodoActual == nullptr) {
-        // El nodo actual es nulo, por lo que el valor no se encuentra en el árbol.
-        return false;
-    }
-
-    if (val == nodoActual->obtenerDato()) {
-        // Encontramos el valor exacto en el nodo actual.
-        return true;
-    }
-
-    // Determinar en qué hijo debemos buscar.
-    if (val.x < nodoActual->obtenerDato().x) {
-        if (val.y < nodoActual->obtenerDato().y) {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoInfIzq());
-        } else {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoSupIzq());
-        }
-    } else {
-        if (val.y < nodoActual->obtenerDato().y) {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoInfDer());
-        } else {
-            return buscarExactoRecursivo(val, nodoActual->obtenerHijoSupDer());
-        }
-    }
-}
-
 //Buscar cercano
 
 punto ArbolQuad::buscarCercano(punto val) {

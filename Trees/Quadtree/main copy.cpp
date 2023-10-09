@@ -44,12 +44,19 @@ int main() {
     quadtree.imprimirArbol();
 
     cout << "-------------------" << endl;
-    cout << "Busqueda de puntos Exacta" << endl;
-    punto p9 = {32, 30};
-    cout << "Busqueda de (32,25): " << quadtree.buscarExacto(p1) << endl;
-    cout << "-------------------" << endl;
-    cout << "Busqueda de puntos Cercanos" << endl;
-    cout << "Busqueda de (32,30): " << quadtree.buscarCercano(p9) << endl;
+    cout << "Busqueda de puntos" << endl;
+    punto p = {32, 30};
+    punto x= quadtree.buscarCercano(p); 
+    if  (x.x != p.x && x.y != p.y)
+    {
+        cout << "El valor (" << p.x << ", " << p.y << ") no se encuentra en el árbol" << endl;
+        cout << "El valor más cercano es: " << x << endl;
+    }
+    else
+    {
+        cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
+        cout << "El valor es: " << x << endl;
+    }
 
 
 

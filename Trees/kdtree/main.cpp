@@ -36,12 +36,18 @@ int main() {
     std::cout << std::endl;
 
     // Buscamos el valor (60,75)
-    if (arbol.buscarExacto({0, 90})) {
-        std::cout << "El valor (10,10) se encuentra en el árbol" << std::endl;
-    } else {
-        std::cout << "El valor (10,10) no se encuentra en el árbol" << std::endl;
-        std::cout << "El valor más cercano es: " << arbol.buscarCercano({0,90}) << std::endl;
+    std::cout << "Buscando el valor (2,3): ";
+    punto p= {2,3};
+    punto y= arbol.buscarCercano(p);
+    if  (y.x != p.x && y.y != p.y)
+    {
+        cout << "El valor (" << p.x << ", " << p.y << ") no se encuentra en el árbol" << endl;
+        cout << "El valor más cercano es: " << y << endl;
     }
-
+    else
+    {
+        cout << "El valor (" << p.x << ", " << p.y << ") se encuentra en el árbol" << endl;
+        cout << "El valor es: " << y << endl;
+    }
     return 0;
 }
