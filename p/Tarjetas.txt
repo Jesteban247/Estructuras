@@ -1,0 +1,44 @@
+1;Territorio;Alaska;Infantería
+2;Territorio;Alberta;Caballería
+3;Territorio;América Central;Artillería
+4;Territorio;Estados Unidos Orientales;Infantería
+5;Territorio;Groenlandia;Caballería
+6;Territorio;Territorio Noroccidental;Artillería
+7;Territorio;Ontario;Infantería
+8;Territorio;Quebec;Caballería
+9;Territorio;Estados Unidos Occidentales;Artillería
+10;Territorio;Argentina;Infantería
+11;Territorio;Brasil;Caballería
+12;Territorio;Perú;Artillería
+13;Territorio;Venezuela;Infantería
+14;Territorio;Gran Bretaña;Caballería
+15;Territorio;Islandia;Artillería
+16;Territorio;Europa del Norte;Infantería
+17;Territorio;Escandinavia;Caballería
+18;Territorio;Europa del Sur;Artillería
+19;Territorio;Europa Occidental;Infantería
+20;Territorio;Ucrania;Caballería
+21;Territorio;Mongolia;Artillería
+22;Territorio;Congo;Infantería
+23;Territorio;África Oriental;Caballería
+24;Territorio;Egipto;Artillería
+25;Territorio;Madagascar;Infantería
+26;Territorio;África del Norte;Caballería
+27;Territorio;Australia Oriental;Artillería
+28;Territorio;Indonesia;Infantería
+29;Territorio;Nueva Guinea;Caballería
+30;Territorio;Australia Occidental;Artillería
+31;Territorio;Gran Bretaña;Infantería
+32;Territorio;Islandia;Caballería
+33;Territorio;Europa del Norte;Artillería
+34;Territorio;Escandinavia;Infantería
+35;Territorio;Europa del Sur;Caballería
+36;Territorio;Europa Occidental;Artillería
+37;Territorio;Ucrania;Infantería
+38;Territorio;Mongolia;Caballería
+39;Territorio;Siberia;Artillería
+40;Territorio;China;Infantería
+41;Territorio;India;Caballería
+42;Territorio;Irkutsk;Artillería
+43;Comodín;Comodín;Comodín
+44;Comodín;Comodín;Comodín

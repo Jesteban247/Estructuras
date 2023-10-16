@@ -1,0 +1,42 @@
+América del Norte;Alaska;1
+América del Norte;Alberta;2
+América del Norte;América Central;3
+América del Norte;Estados Unidos Orientales;4
+América del Norte;Groenlandia;5
+América del Norte;Territorio Noroccidental;6
+América del Norte;Ontario;7
+América del Norte;Quebec;8
+América del Norte;Estados Unidos Occidentales;9
+América del Sur;Argentina;10
+América del Sur;Brasil;11
+América del Sur;Perú;12
+América del Sur;Venezuela;13
+Europa;Gran Bretaña;14
+Europa;Islandia;15
+Europa;Europa del Norte;16
+Europa;Escandinavia;17
+Europa;Europa del Sur;18
+Europa;Ucrania;19
+Europa;Europa Occidental;20
+África;Congo;21
+África;África Oriental;22
+África;Egipto;23
+África;Madagascar;24
+África;África del Norte;25
+África;África del Sur;26
+Asia;Afghanistán;27
+Asia;China;28
+Asia;India;29
+Asia;Irkutsk;30
+Asia;Japón;31
+Asia;Kamchatka;32
+Asia;Medio Oriente;33
+Asia;Mongolia;34
+Asia;Siam;35
+Asia;Siberia;36
+Asia;Ural;37
+Asia;Yakutsk;38
+Australia;Australia Oriental;39
+Australia;Indonesia;40
+Australia;Nueva Guinea;41
+Australia;Australia Occidental;42
