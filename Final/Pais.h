@@ -14,12 +14,12 @@ class Pais
         int estado;
 
     public:
-        Pais(int id, string continente, string nombre)
-        Pais(int id, string continente, string nombre)
+        Pais(int id, string continente, string nombre);
+        Pais(int id, string continente, string nombre, int estado);
         getContinente();
         getID();
         getNombre();
         getEstado();
-        setEstado();
+        setEstado(int estado);
          
 };
