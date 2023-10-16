@@ -1,14 +1,6 @@
-
-class Pais
-{
-    private:
-        int id;
-        string continente;
-        string nombre;
-        int estado;
-
-    public:
-        Pais(int id, string continente, string nombre)
+#include "Pais.h"
+    
+        Pais::Pais(int id, string continente, string nombre)
         {
             this->id = id;
             this->continente = continente;
@@ -16,28 +8,28 @@ class Pais
             this->estado = 0;
         }
 
-        int getId()
+        int Pais::getId()
         {
             return id;
         }
 
-        string getContinente()
+        string Pais::getContinente()
         {
             return continente;
         }
 
-        string getNombre()
+        string Pais::getNombre()
         {
             return nombre;
         }
 
-        int getEstado()
+        int Pais::getEstado()
         {
             return estado;
         }
 
-        void setEstado(int estado)
+        void Pais::setEstado(int estado)
         {
             this->estado = estado;
         }
-};
+
