@@ -7,6 +7,12 @@
             this->nombre = nombre;
             this->estado = 0;
         }
+        Pais::Pais(int id, string continente, string nombre, int estado)
+        {
+            this->id = id;
+            this->continente = continente;
+            this->nombre = nombre;
+            this->estado = estado;
 
         int Pais::getId()
         {
