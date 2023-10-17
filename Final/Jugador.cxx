@@ -37,7 +37,7 @@
             paises[id] = ejercitos;
         }
 
-        map<int, int> getPaises()
+        map<int, int> Jugador::getPaises()
         {
             return paises;
         }
