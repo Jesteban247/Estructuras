@@ -16,11 +16,11 @@ class Pais
     public:
         Pais(int id, string continente, string nombre);
         Pais(int id, string continente, string nombre, int estado);
-        getContinente();
-        getID();
-        getNombre();
-        getEstado();
-        setEstado(int estado);
+        string getContinente();
+        int getID();
+        string getNombre();
+        int getEstado();
+        void setEstado(int estado);
          
 };
 #endif
