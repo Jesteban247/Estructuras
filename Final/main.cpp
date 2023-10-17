@@ -7,6 +7,9 @@
 #include <queue>
 #include <unordered_map>
 #include <bitset>
+
+#include "Pais.h"
+#include "Jugador.h"
 using namespace std;
 
 #define EMPTY_STRING ""
