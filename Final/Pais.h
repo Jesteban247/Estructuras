@@ -23,3 +23,4 @@ class Pais
         setEstado(int estado);
          
 };
+#endif
