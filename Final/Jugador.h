@@ -4,6 +4,7 @@
 #include "Pais.h"
 #include <list>
 #include <map>
+
 class Jugador
 {
     private:
