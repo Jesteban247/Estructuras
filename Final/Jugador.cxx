@@ -6,13 +6,6 @@
             this->turno = turno;
             this->ejercitos = ejercitos;
         }
-        Jugador::Jugador(string nombre, int turno, int ejercitos, map<int,int> paises)
-        {
-            this->nombre = nombre;
-            this->turno = turno;
-            this->ejercitos = ejercitos;
-            this->paises= paises;
-        }
         
         string Jugador::getNombre()
         {
