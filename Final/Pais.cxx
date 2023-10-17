@@ -13,6 +13,7 @@
             this->continente = continente;
             this->nombre = nombre;
             this->estado = estado;
+        }
 
         int Pais::getId()
         {
