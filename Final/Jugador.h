@@ -7,10 +7,11 @@
 
 class Jugador
 {
-    private:
+    protected:
         string nombre;
         int turno;
         int ejercitos;
+        int dado;
         //Guarda el id del pais y la cantidad de ejercitos del pais
         map<int, int> paises;
         set<int> Tarjetas;
@@ -22,7 +23,11 @@ class Jugador
         string getNombre();
 
         int getTurno();
-        
+
+        int getDado();
+
+        void setDado(int dado);
+
         void setTurno(int turno);
         
         int getEjercitos();
