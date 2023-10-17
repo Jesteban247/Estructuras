@@ -17,7 +17,7 @@ class Pais
         Pais(int id, string continente, string nombre);
         Pais(int id, string continente, string nombre, int estado);
         string getContinente();
-        int getID();
+        int getId();
         string getNombre();
         int getEstado();
         void setEstado(int estado);
