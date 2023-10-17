@@ -2,8 +2,8 @@
 #define Jugador_H
 
 #include "Pais.h"
-#include <list>
 #include <map>
+#include <set>
 
 class Jugador
 {
@@ -13,6 +13,8 @@ class Jugador
         int ejercitos;
         //Guarda el id del pais y la cantidad de ejercitos del pais
         map<int, int> paises;
+        set<int> Tarjetas;
+
 
     public:
         Jugador(string nombre, int turno, int ejercitos);
@@ -36,6 +38,12 @@ class Jugador
         void EliminarPais(int id);
        
         void imprimirPaises();
+
+        void agregarTarjeta(int id);
+
+        void eliminarTarjeta(int id);
+
+        set<int> getTarjetas();
         
 };
 #endif

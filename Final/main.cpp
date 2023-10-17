@@ -1,18 +1,12 @@
-#include <iostream>
-#include <string>
 #include <vector>
-#include <fstream>
-#include <map>
 #include <sstream>
-#include <queue>
-#include <unordered_map>
 #include <bitset>
 
 #include "Pais.h"
 #include "Jugador.h"
-using namespace std;
+#include "Arbol_Huffman.h"
+#include "Tarjeta.h"
 
-#define EMPTY_STRING ""
 
 int menu()
 {
@@ -106,6 +100,15 @@ void guardarPartida(vector<Jugador> &jugadores)
             archivo << it->second << ";";
         }
 
+        set<int> tarjetas = jugadores[i].getTarjetas();
+
+        archivo << tarjetas.size() << ";";
+
+        for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
+        {
+            archivo << *it << ";";
+        }
+
         archivo << endl;
     }
 
@@ -148,6 +151,18 @@ vector<Jugador> cargarPartida(string nombreArchivo)
             int ejercitos = stoi(pais.substr(posPuntoComa + 1));
 
             jugador.agregarPais(id, ejercitos);
+        }
+
+        posPuntoComa = linea.find(';');
+        int cantidadTarjetas = stoi(linea.substr(0, posPuntoComa));
+
+        for (int i = 0; i < cantidadTarjetas; i++)
+        {
+            linea = linea.substr(posPuntoComa + 1);
+            posPuntoComa = linea.find(';');
+            int id = stoi(linea.substr(0, posPuntoComa));
+
+            jugador.agregarTarjeta(id);
         }
 
         jugadores.push_back(jugador);
@@ -195,203 +210,38 @@ map<int, vector<int>> cargarPaisesVecinos() {
 }
 
 
-// Arbol Huffman
+// Tarjetas
 
+//Funcion para leer las tarjetas
+vector<Tarjeta> leerTarjetas()
+{
+    vector<Tarjeta> tarjetas;
 
-// Un nodo de árbol
-struct Node
-{
-    char ch;
-    int freq;
-    Node *left, *right;
-};
- 
-// Estructura de datos para almacenar un nodo de árbol
-struct HuffmanResult {
-    Node* root;
-    map<char, int> huffmanCodes;
-};
+    ifstream archivo("Tarjetas.txt");
 
-// Función para asignar un nuevo nodo de árbol
-Node* getNode(char ch, int freq, Node* left, Node* right)
-{
-    Node* node = new Node();
- 
-    node->ch = ch;
-    node->freq = freq;
-    node->left = left;
-    node->right = right;
- 
-    return node;
-}
- 
-// Objeto de comparación que se usará para ordenar el heap
-struct comp
-{
-    bool operator()(const Node* l, const Node* r) const
+    string linea;
+
+    while (getline(archivo, linea))
     {
-        // el elemento de mayor prioridad tiene la menor frecuencia
-        return l->freq > r->freq;
-    }
-};
- 
-// Función de utilidad para verificar si Huffman Tree contiene solo un solo nodo
-bool isLeaf(Node* root) {
-    return root->left == nullptr && root->right == nullptr;
-}
- 
-// Atraviesa el árbol de Huffman y almacena los códigos de Huffman en un mapa.
-void encode(Node* root, string str, unordered_map<char, string> &huffmanCode)
-{
-    if (root == nullptr) {
-        return;
-    }
- 
-    // encontrado un nodo hoja
-    if (isLeaf(root)) {
-        huffmanCode[root->ch] = (str != EMPTY_STRING) ? str : "1";
-    }
- 
-    encode(root->left, str + "0", huffmanCode);
-    encode(root->right, str + "1", huffmanCode);
-}
- 
-// Atraviesa el árbol de Huffman y decodifica la string codificada
-void decode(Node* root, int &index, string str, ofstream &archivo)
-{
-    if (root == nullptr) {
-        return;
-    }
- 
-    // encontrado un nodo hoja
-    if (isLeaf(root))
-    {
-        //cout << root->ch;
-        archivo << root->ch;
-        return;
-    }
- 
-    index++;
- 
-    if (str[index] == '0') {
-        decode(root->left, index, str, archivo);
-    }
-    else {
-        decode(root->right, index, str, archivo);
-    }
-}
- 
-// Construye Huffman Tree y decodifica el texto de entrada dado
-HuffmanResult buildHuffmanTree(string text)
-{
-    // caso base: string vacía
-    if (text == EMPTY_STRING) {
-        return HuffmanResult{nullptr, {}};
-    }
- 
-    // cuenta la frecuencia de aparición de cada personaje
-    // y almacenarlo en un mapa
-    map<char, int> freq;
-    for (char ch: text) {
-        freq[ch]++;
-    }
+        int posPuntoComa = linea.find(';');
+        int id = stoi(linea.substr(0, posPuntoComa));
+        linea = linea.substr(posPuntoComa + 1);
+        posPuntoComa = linea.find(';');
+        string pais = linea.substr(0, posPuntoComa);
+        linea = linea.substr(posPuntoComa + 1);
+        string tipo = linea;
 
-    /*
-    //Muestra el unorder_map
-    cout << "Unorder_map: " << endl;
-    for (auto pair: freq) {
-        cout << pair.first << " " << pair.second << endl;
-    }
-    */
- 
-    // Crear una cola de prioridad para almacenar nodos en vivo del árbol de Huffman
-    priority_queue<Node*, vector<Node*>, comp> pq;
- 
-    // Crea un nodo hoja para cada carácter y añádelo
-    // a la cola de prioridad.
-    for (auto pair: freq) {
-        pq.push(getNode(pair.first, pair.second, nullptr, nullptr));
-    }
- 
-    // hacer hasta que haya más de un nodo en la queue
-    while (pq.size() != 1)
-    {
-        // Elimina los dos nodos de mayor prioridad
-        // (la frecuencia más baja) de la queue
- 
-        Node* left = pq.top(); pq.pop();
-        Node* right = pq.top();    pq.pop();
- 
-        // crea un nuevo nodo interno con estos dos nodos como hijos y
-        // con una frecuencia igual a la suma de las frecuencias de los dos nodos.
-        // Agregar el nuevo nodo a la cola de prioridad.
- 
-        int sum = left->freq + right->freq;
-        pq.push(getNode('\0', sum, left, right));
-    }
- 
-    // `root` almacena el puntero a la raíz de Huffman Tree
-    Node* root = pq.top();
- 
-    return HuffmanResult{root, freq};
+        Tarjeta tarjeta(id, pais, tipo);
 
-}
- 
-//Códigos Huffman
-string Huffman_codes(Node *root, string text)
-{
-    // Atraviesa el árbol Huffman y almacena códigos Huffman
-    // en un mapa. Además imprímelos
-    unordered_map<char, string> huffmanCode;
-    encode(root, EMPTY_STRING, huffmanCode);
- 
-    /*
-    cout << "Huffman Codes are:\n" << endl;
-    for (auto pair: huffmanCode) {
-        cout << pair.first << " " << pair.second << endl;
-    }
-    */
- 
-    //cout << "\nThe original string is:\n" << text << endl;
- 
-    // String codificada
-    string str;
-    for (char ch: text) {
-        str += huffmanCode[ch];
-    }
- 
-    //cout << "\nThe encoded string is:\n" << str << endl;
-
-    return str;
-}
-
-void decode_Huffman(Node *root, string str)
-{
-    //Abre un archivo txt llamado "Decodificado.txt"
-    ofstream archivo("Decodificado.txt");
-
-
-    //cout << "\nThe decoded string is:\n";
- 
-    if (isLeaf(root))
-    {
-        // Caso especial: Para entradas como a, aa, aaa, etc.
-        while (root->freq--) {
-            //cout << root->ch;
-            archivo << root->ch;
-        }
-    }
-    else {
-        // Atraviesa el árbol Huffman de nuevo y esta vez,
-        // decodifica la string codificada
-        int index = -1;
-        while (index < (int)str.size() - 1) {
-            decode(root, index, str, archivo);
-        }
+        tarjetas.push_back(tarjeta);
     }
 
     archivo.close();
+
+    return tarjetas;
 }
+
+// Arbol Huffman
 
 // Lee el contenido de un archivo y lo devuelve como string
 string readFromFile(const string& filename) {
@@ -430,42 +280,6 @@ map<char, int> DeserializeMap(const std::string& filename) {
     return loaded_map;
 }
 
-// Construye Huffman Tree y decodifica el texto de entrada dado
-Node* buildHuffmanTree(map<char, int> freq)
-{
-   
-    // Crear una cola de prioridad para almacenar nodos en vivo del árbol de Huffman
-    priority_queue<Node*, vector<Node*>, comp> pq;
- 
-    // Crea un nodo hoja para cada carácter y añádelo
-    // a la cola de prioridad.
-    for (auto pair: freq) {
-        pq.push(getNode(pair.first, pair.second, nullptr, nullptr));
-    }
- 
-    // hacer hasta que haya más de un nodo en la queue
-    while (pq.size() != 1)
-    {
-        // Elimina los dos nodos de mayor prioridad
-        // (la frecuencia más baja) de la queue
- 
-        Node* left = pq.top(); pq.pop();
-        Node* right = pq.top();    pq.pop();
- 
-        // crea un nuevo nodo interno con estos dos nodos como hijos y
-        // con una frecuencia igual a la suma de las frecuencias de los dos nodos.
-        // Agregar el nuevo nodo a la cola de prioridad.
- 
-        int sum = left->freq + right->freq;
-        pq.push(getNode('\0', sum, left, right));
-    }
- 
-    // `root` almacena el puntero a la raíz de Huffman Tree
-    Node* root = pq.top();
- 
-    return root;
-}
- 
 // Función para guardar un string binario en un archivo binario
 void guardarEnArchivoBinario(const string& str, const string& nombreArchivo) {
     ofstream archivo(nombreArchivo, ios::out | ios::binary);
@@ -506,6 +320,7 @@ int main()
     vector<Pais> paises = leerPaises();
     vector<Jugador> jugadores;
     map<int, vector<int>> paisesVecinos= cargarPaisesVecinos();
+    vector<Tarjeta> tarjetas = leerTarjetas();
 
     int opcion = menu();
 
@@ -654,6 +469,61 @@ int main()
                             }
                         }
                     }
+
+                    if (America_N == 9)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                    }
+                    else if (America_S == 4)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
+                    }
+                    else if (Europa == 7)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                    }
+                    else if (Asia == 12)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 7);
+                    }
+                    else if (Africa == 6)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 3);
+                    }
+                    else if (Australia == 4)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
+                    }
+
+                    //Revisar tarjetas
+
+                    set<int> tarjetas_j = jugadores[i].getTarjetas();
+                    int cantidadTarjetas = tarjetas_j.size();
+
+                    if (cantidadTarjetas >=3)
+                    {
+                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                        //Eliminar solo las tres primeras tarjetas
+                        int contador = 0;
+                        for (auto it = tarjetas_j.begin(); it != tarjetas_j.end(); it++)
+                        {
+                            if (contador < 3)
+                            {
+                                //Cambiar el estado de la tarjeta a 0
+                                for (int j = 0; j < tarjetas.size(); j++)
+                                {
+                                    if (tarjetas[j].getID() == *it)
+                                    {
+                                        tarjetas[j].setEstado(0);
+                                    }
+                                }
+
+                                jugadores[i].eliminarTarjeta(*it);
+                                contador++;
+                            }
+                        }
+                    }
+
 
                     cout << "Ejercitos nuevos: " << jugadores[i].getEjercitos() << endl;
 
@@ -923,6 +793,21 @@ int main()
                                         jugadores[i].agregarPais(idPaisAtacado, 1);
                                         jugadores[i].setEjercitos(jugadores[i].getEjercitos() - 1);
                                         it->EliminarPais(idPaisAtacado);
+
+
+                                        //Se informa al jugador que puede recibir una tarjeta
+                                        cout << "El jugador " << jugadores[i].getNombre() << " puede recibir una tarjeta" << endl;
+
+                                        for (int j = 0; j < tarjetas.size(); j++)
+                                        {
+                                            if (tarjetas[j].getID() == idPaisAtacado)
+                                            {
+                                                cout << "El jugador " << jugadores[i].getNombre() << " recibe la tarjeta " << tarjetas[j].getTipo() << " de " << tarjetas[j].getPais() << endl;
+                                                jugadores[i].agregarTarjeta(tarjetas[j].getID());
+                                                tarjetas[j].setEstado(1);
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -948,7 +833,8 @@ int main()
                         }
 
                     }
-
+                
+                
                     //Parte 3: Mover ejercitos
 
                     cout << "Desear movee ejercitos? (1 = si, 0 = no): ";
@@ -1159,6 +1045,16 @@ int main()
                 cout << "Nombre: " << jugadores[i].getNombre() << endl;
                 cout << "Turno: " << jugadores[i].getTurno() << endl;
                 cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
+                set <int> tarjetas = jugadores[i].getTarjetas();
+                if (tarjetas.size() > 0)
+                {
+                    cout << "Tarjetas: ";
+                    for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
+                    {
+                        cout << "Id: " << *it << ", "; 
+                    }
+                    cout << endl;
+                }
                 cout << "-------------------------" << endl;
             }
         }
@@ -1212,8 +1108,20 @@ int main()
                 cout << "Nombre: " << jugadores[i].getNombre() << endl;
                 cout << "Turno: " << jugadores[i].getTurno() << endl;
                 cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
+                set <int> tarjetas = jugadores[i].getTarjetas();
+                if (tarjetas.size() > 0)
+                {
+                    cout << "Tarjetas: ";
+                    for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
+                    {
+                        cout << "Id: " << *it << ", "; 
+                    }
+                    cout << endl;
+                }
                 cout << "-------------------------" << endl;
             }
+
+            
             
 
         }

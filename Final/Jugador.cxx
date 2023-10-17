@@ -60,3 +60,18 @@
             }
             cout << endl;
         }
+
+        void Jugador::agregarTarjeta(int id)
+        {
+            Tarjetas.insert(id);
+        }
+
+        void Jugador::eliminarTarjeta(int id)
+        {
+            Tarjetas.erase(id);
+        }
+
+        set<int> Jugador::getTarjetas()
+        {
+            return Tarjetas;
+        }
