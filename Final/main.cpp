@@ -1,28 +1,27 @@
 #include <vector>
 #include <sstream>
 #include <bitset>
+#include <limits>
 
 #include "Pais.h"
 #include "Jugador.h"
 #include "Arbol_Huffman.h"
 #include "Tarjeta.h"
+#include "Help.h"
 
-
-int menu()
+// Funcion para Ayuda
+void menu_ayuda()
 {
-    cout << "1. Asignar paises" << endl;
-    cout << "2. Atacar" << endl;
-    cout << "3. Guardar partida txt" << endl;
-    cout << "4. Cargar partida txt" << endl;
-    cout << "5. Guardar partida bin" << endl;
-    cout << "6. Cargar partida bin" << endl;
-    cout << "10. Salir" << endl;
+    cout << "Comandos disponibles" <<endl;
+    cout << "1: inicializar" <<endl;
+    cout << "2: turno" <<endl;
+    cout << "3: guardar" <<endl;
+    cout << "4: guardar_comprimido" <<endl;
+    cout << "5: inicializar _nombre_archivo" <<endl;
+    cout << "6: costo_conquista" <<endl;
+    cout << "7: conquista_mas_barata" <<endl;
 
-    cout << "Ingrese una opcion: ";
-    int opcion;
-    cin >> opcion;
-
-    return opcion;
+    cout << "Para mayor ayuda escriba: ayuda <comando>" <<endl;
 }
 
 // Funcion para leer los paises
@@ -255,10 +254,10 @@ string readFromFile(const string& filename) {
     return content;
 }
 
-// Función para serializar un unordered_map
-void SerializeMap(const std::map<char, int>& map, const std::string& filename) {
-    std::ofstream outfile(filename, std::ios::binary);
-    std::vector<std::pair<char, int>> pairs(map.begin(), map.end()); // Copia pares clave-valor en un vector
+// Función para serializar un map<char, int> a un archivo binario
+void SerializeMap(const map<char, int>& map, const string& filename) {
+    ofstream outfile(filename, ios::binary);
+    vector<pair<char, int>> pairs(map.begin(), map.end()); // Copia pares clave-valor en un vector
     for (const auto& pair : pairs) {
         outfile.write(reinterpret_cast<const char*>(&pair.first), sizeof(char));
         outfile.write(reinterpret_cast<const char*>(&pair.second), sizeof(int));
@@ -266,15 +265,43 @@ void SerializeMap(const std::map<char, int>& map, const std::string& filename) {
     outfile.close();
 }
 
-// Función para deserializar un unordered_map
-map<char, int> DeserializeMap(const std::string& filename) {
-    ifstream infile(filename, std::ios::binary);
+// Función para deserializar un map<int, int> y convertirlo en un map<char, int> con caracteres ASCII
+map<char, int> DeserializeMap(const string& filename) {
+    ifstream infile(filename, ios::binary);
     map<char, int> loaded_map;
     char key;
     int value;
     while (infile.read(reinterpret_cast<char*>(&key), sizeof(char)) &&
            infile.read(reinterpret_cast<char*>(&value), sizeof(int))) {
         loaded_map[key] = value;
+    }
+    infile.close();
+    return loaded_map;
+}
+
+
+// Función para serializar un map<int, int> usando valores ASCII de caracteres
+void SerializeMap(const map<int, int>& map, const string& filename) {
+    ofstream outfile(filename, ios::binary);
+    vector<pair<int, int>> pairs(map.begin(), map.end()); // Copia pares clave-valor en un vector
+    for (const auto& pair : pairs) {
+        outfile.write(reinterpret_cast<const char*>(&pair.first), sizeof(int));
+        outfile.write(reinterpret_cast<const char*>(&pair.second), sizeof(int));
+    }
+    outfile.close();
+}
+
+// Función para deserializar un map<int, int> y convertirlo en un map<char, int> con caracteres ASCII
+map<char, int> DeserializeMap(const string& filename) {
+    ifstream infile(filename, ios::binary);
+    map<char, int> loaded_map;
+    int key;
+    int value;
+    while (infile.read(reinterpret_cast<char*>(&key), sizeof(int)) &&
+           infile.read(reinterpret_cast<char*>(&value), sizeof(int))) {
+        // Convertir clave (valor ASCII) a un carácter
+        char character = static_cast<char>(key);
+        loaded_map[character] = value;
     }
     infile.close();
     return loaded_map;
@@ -313,825 +340,1031 @@ string leerDesdeArchivoBinario(const string& nombreArchivo) {
 }
 
 
-int main() 
+int main()
 {
-    cout << "Hola, bienvenido a Risk" << endl;
+    setlocale(LC_ALL, " ");
+    string command;
 
     vector<Pais> paises = leerPaises();
     vector<Jugador> jugadores;
     map<int, vector<int>> paisesVecinos= cargarPaisesVecinos();
     vector<Tarjeta> tarjetas = leerTarjetas();
 
-    int opcion = menu();
 
-    while (opcion != 10)
+    while (true)
     {
+        cout << "$ ";
+        getline(cin, command);
 
-        if (opcion == 1)
+        istringstream iss(command);
+        vector<string> tokens;
+        string token;
+        while (iss >> token)
         {
-            cout << "Cantidad de jugadores: " << endl;
-            int cantidadJugadores;
-            cin >> cantidadJugadores;
-
-            int tropas = 0;
-
-            if (cantidadJugadores == 2)
-            {
-                tropas = 40;
-            }
-            else if (cantidadJugadores == 3)
-            {
-                tropas = 35;
-            }
-            else if (cantidadJugadores == 4)
-            {
-                tropas = 30;
-            }
-            else if (cantidadJugadores == 5)
-            {
-                tropas = 25;
-            }
-            else if (cantidadJugadores == 6)
-            {
-                tropas = 20;
-            }
-
-            for (int i = 0; i < cantidadJugadores; i++)
-            {
-                cout << "Nombre del jugador " << i + 1 << ": ";
-                string nombre;
-                cin >> nombre;
-
-                Jugador jugador(nombre, i + 1, tropas);
-
-                jugadores.push_back(jugador);
-            }
-
-            cout << "Se van a asignar los paises" << endl;
-
-            int cantidadPaises = paises.size();
-            while (cantidadPaises > 0)
-            {
-                for (int i = 0; i < jugadores.size(); i++)
-                {
-                    imprimirPaises(paises);
-
-                    cout << "Turno de " << jugadores[i].getNombre() << endl;
-                    cout << "Ingrese el id del pais: ";
-                    int idPais;
-                    cin >> idPais;
-
-                    bool condicion = false;
-                    while (!condicion)
-                    {
-                        for (int j = 0; j < paises.size(); j++)
-                        {
-                            if (paises[j].getId() == idPais && paises[j].getEstado() == 0)
-                            {
-                                condicion = true;
-                                paises[j].setEstado(1);
-                                jugadores[i].agregarPais(idPais, 1);
-                                jugadores[i].setEjercitos(jugadores[i].getEjercitos() - 1);
-                                cantidadPaises--;
-                                break;
-                            }
-                        }
-
-                        if (!condicion)
-                        {
-                            cout << "Ingrese un id valido: ";
-                            cin >> idPais;
-                        }
-                    }
-                }  
-            }
-
-            cout << "Se asignaron todos los paises" << endl;
+            tokens.push_back(token);
         }
 
-
-        if (opcion == 2)
+        if (!tokens.empty())
         {
-            cout << "Atacar" << endl;
+            //Componente 1: configuración del juego
 
-            for (int i = 0; i < jugadores.size(); i++)
+            if (tokens[0] == "inicializar")
             {
-                if (jugadores[i].getTurno() ==1)
+                if (tokens.size() == 1)
                 {
-                    //Parte 1: Obtener y ubicar nuevas unidades de ejército.
-
-                    cout << "Turno de " << jugadores[i].getNombre() << endl;
-                    cout << "Ejercitos viejos: " << jugadores[i].getEjercitos() << endl;
-
-                    //Territorios
-                    int territorios = jugadores[i].getPaises().size();
-                    int ejercitos = territorios / 3;
-                    jugadores[i].setEjercitos(jugadores[i].getEjercitos() + ejercitos);
-
-                    //Continentes
-                    map<int, int> paises_jugador = jugadores[i].getPaises();
-                    int America_N = 0;
-                    int America_S = 0;
-                    int Europa = 0;
-                    int Asia = 0;
-                    int Africa = 0;
-                    int Australia = 0;
-                    for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                    cout << "Comando 'inicializar' ingresado." << endl;
+                                   
+                    if (1 == 1)
                     {
-                        for (int j = 0; j < paises.size(); j++)
+                        cout << "Digite la cantidad de jugadores: ";
+                        int cantidadJugadores;
+                        cin >> cantidadJugadores;
+
+                        int tropas = 0;
+
+                        if (cantidadJugadores == 2)
                         {
-                            if (it->first == paises[j].getId())
-                            {
-                                if (paises[j].getContinente() == "América del Norte")
-                                {
-                                    America_N++;
-                                }
-                                else if (paises[j].getContinente() == "América del Sur")
-                                {
-                                    America_S++;
-                                }
-                                else if (paises[j].getContinente() == "Europa")
-                                {
-                                    Europa++;
-                                }
-                                else if (paises[j].getContinente() == "Asia")
-                                {
-                                    Asia++;
-                                }
-                                else if (paises[j].getContinente() == "África")
-                                {
-                                    Africa++;
-                                }
-                                else if (paises[j].getContinente() == "Australia")
-                                {
-                                    Australia++;
-                                }
-                            }
+                            tropas = 40;
                         }
-                    }
-
-                    if (America_N == 9)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
-                    }
-                    else if (America_S == 4)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
-                    }
-                    else if (Europa == 7)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
-                    }
-                    else if (Asia == 12)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 7);
-                    }
-                    else if (Africa == 6)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 3);
-                    }
-                    else if (Australia == 4)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
-                    }
-
-                    //Revisar tarjetas
-
-                    set<int> tarjetas_j = jugadores[i].getTarjetas();
-                    int cantidadTarjetas = tarjetas_j.size();
-
-                    if (cantidadTarjetas >=3)
-                    {
-                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
-                        //Eliminar solo las tres primeras tarjetas
-                        int contador = 0;
-                        for (auto it = tarjetas_j.begin(); it != tarjetas_j.end(); it++)
+                        else if (cantidadJugadores == 3)
                         {
-                            if (contador < 3)
+                            tropas = 35;
+                        }
+                        else if (cantidadJugadores == 4)
+                        {
+                            tropas = 30;
+                        }
+                        else if (cantidadJugadores == 5)
+                        {
+                            tropas = 25;
+                        }
+                        else if (cantidadJugadores == 6)
+                        {
+                            tropas = 20;
+                        }
+
+                        for (int i = 0; i < cantidadJugadores; i++)
+                        {
+                            cout << "Nombre del jugador " << i + 1 << ": ";
+                            string nombre;
+                            cin >> nombre;
+
+                            Jugador jugador(nombre, i + 1, tropas);
+
+                            jugadores.push_back(jugador);
+                        }
+
+                        cout << "Se van a asignar los paises" << endl;
+
+                        int cantidadPaises = paises.size();
+                        while (cantidadPaises > 0)
+                        {
+                            for (int i = 0; i < jugadores.size(); i++)
                             {
-                                //Cambiar el estado de la tarjeta a 0
-                                for (int j = 0; j < tarjetas.size(); j++)
+                                imprimirPaises(paises);
+
+                                cout << "Turno de " << jugadores[i].getNombre() << endl;
+                                cout << "Ingrese el id del pais: ";
+                                int idPais;
+                                cin >> idPais;
+
+                                bool condicion = false;
+                                while (!condicion)
                                 {
-                                    if (tarjetas[j].getID() == *it)
+                                    for (int j = 0; j < paises.size(); j++)
                                     {
-                                        tarjetas[j].setEstado(0);
-                                    }
-                                }
-
-                                jugadores[i].eliminarTarjeta(*it);
-                                contador++;
-                            }
-                        }
-                    }
-
-
-                    cout << "Ejercitos nuevos: " << jugadores[i].getEjercitos() << endl;
-
-
-
-                    //Parte 2: Atacar
-
-                    cout << "Desear atacar? (1 = si, 0 = no): ";
-                    int opcion;
-                    cin >> opcion;
-
-                    while (opcion != 0 && opcion != 1)
-                    {
-                        cout << "Ingrese una opcion valida: ";
-                        cin >> opcion;
-                    }
-
-                    while (opcion ==1) 
-                    {
-                        map<int, int> paises_jugador = jugadores[i].getPaises();
-
-                        //Mostrar paises del jugador
-                        cout << "Paises del jugador: " << endl;
-                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                        {
-                            for (int j = 0; j < paises.size(); j++)
-                            {
-                                if (it->first == paises[j].getId())
-                                {
-                                    cout << "Id: " << paises[j].getId() << ". Nombre: " << paises[j].getNombre() << ". Ejercitos: " << it->second << endl;
-                                }
-                            }
-                        }
-
-                        cout << "Ingrese el id del pais del que va a atacar: ";
-                        int idPaisAtacante;
-                        cin >> idPaisAtacante;
-                        bool condicion = false;
-                        while (!condicion)
-                        {
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPaisAtacante)
-                                {
-                                    condicion = true;
-                                    break;
-                                }
-                            }
-
-                            if (!condicion)
-                            {
-                                cout << "Ingrese un id valido: ";
-                                cin >> idPaisAtacante;
-                            }
-                        }
-
-                        //Mostrar paises vecinos
-                        cout << "Paises vecinos: " << endl;
-                        vector<int> vecinos = paisesVecinos[idPaisAtacante];
-                        for (int j = 0; j < vecinos.size(); j++)
-                        {
-                            for (int k = 0; k < paises.size(); k++)
-                            {
-                                if (vecinos[j] == paises[k].getId())
-                                {
-                                    cout << "Id: " << paises[k].getId() << ". Nombre: " << paises[k].getNombre() << endl;
-                                }
-                            }
-                        }
-
-                        cout << "Ingrese el id del pais que va a atacar: ";
-                        int idPaisAtacado;
-                        cin >> idPaisAtacado;
-                        condicion = false;
-                        while (!condicion)
-                        {
-                            for (int j = 0; j < vecinos.size(); j++)
-                            {
-                                if (vecinos[j] == idPaisAtacado)
-                                {
-                                    condicion = true;
-                                    break;
-                                }
-                            }
-
-                            if (!condicion)
-                            {
-                                cout << "Ingrese un id valido: ";
-                                cin >> idPaisAtacado;
-                            }
-                        }
-
-                        //Sortear dados del atacante y defensor
-                        vector<int> dadosAtacante;
-                        vector<int> dadosDefensor;
-                        int cantidadDadosAtacante = 3;
-                        int cantidadDadosDefensor = 2;
-                        
-                        for (int j = 0; j < cantidadDadosAtacante; j++)
-                        {
-                            int dado = rand() % 6 + 1;
-                            dadosAtacante.push_back(dado);
-                        }
-
-                        for (int j = 0; j < cantidadDadosDefensor; j++)
-                        {
-                            int dado = rand() % 6 + 1;
-                            dadosDefensor.push_back(dado);
-                        }
-
-                        //Ordenar dados, no acepta el sort
-                        for (int j = 0; j < dadosAtacante.size(); j++)
-                        {
-                            for (int k = 0; k < dadosAtacante.size() - 1; k++)
-                            {
-                                if (dadosAtacante[k] < dadosAtacante[k + 1])
-                                {
-                                    int aux = dadosAtacante[k];
-                                    dadosAtacante[k] = dadosAtacante[k + 1];
-                                    dadosAtacante[k + 1] = aux;
-                                }
-                            }
-                        }
-
-                        for (int j = 0; j < dadosDefensor.size(); j++)
-                        {
-                            for (int k = 0; k < dadosDefensor.size() - 1; k++)
-                            {
-                                if (dadosDefensor[k] < dadosDefensor[k + 1])
-                                {
-                                    int aux = dadosDefensor[k];
-                                    dadosDefensor[k] = dadosDefensor[k + 1];
-                                    dadosDefensor[k + 1] = aux;
-                                }
-                            }
-                        }
-
-                        //Mostrar dados
-                        cout << "Dados del atacante: " << endl;
-                        for (int j = 0; j < dadosAtacante.size(); j++)
-                        {
-                            cout << dadosAtacante[j] << ", ";
-                        }
-                        cout << endl;
-
-                        cout << "Dados del defensor: " << endl;
-                        for (int j = 0; j < dadosDefensor.size(); j++)
-                        {
-                            cout << dadosDefensor[j] << ", ";
-                        }
-                        cout << endl;
-                        
-                        //Sumar los dos primeros dados y definir el ganador y el perdedor
-                        int sumaAtacante = dadosAtacante[0] + dadosAtacante[1];
-                        int sumaDefensor = dadosDefensor[0] + dadosDefensor[1];
-
-                        if (sumaAtacante > sumaDefensor)
-                        {
-                            cout << "Gana el atacante" << endl;
-
-                            //Sumar un ejercito al pais del atacante
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPaisAtacante)
-                                {
-                                    it->second++;
-                                }
-                            }
-
-                            //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
-                            for (int j = 0; j < jugadores.size(); j++)
-                            {
-                                if (jugadores[j].getTurno() != 1)
-                                {
-                                    map<int, int> paises_jugador = jugadores[j].getPaises();
-                                    for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                                    {
-                                        if (it->first == idPaisAtacado)
+                                        if (paises[j].getId() == idPais && paises[j].getEstado() == 0)
                                         {
-                                            it->second--;
+                                            condicion = true;
+                                            paises[j].setEstado(1);
+                                            jugadores[i].agregarPais(idPais, 1);
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() - 1);
+                                            cantidadPaises--;
+                                            break;
                                         }
                                     }
-                                    jugadores[j].setPaises(paises_jugador);
-                                }
-                            }
 
-                        }
-
-                        else
-                        {
-                            cout << "Gana el defensor" << endl;
-                            
-                            //Restar un ejercito al pais del atacante
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPaisAtacante)
-                                {
-                                    it->second--;
-                                }
-                            }
-
-                            //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
-                            for (int j = 0; j < jugadores.size(); j++)
-                            {
-                                if (jugadores[j].getTurno() != 1)
-                                {
-                                    map<int, int> paises_jugador = jugadores[j].getPaises();
-                                    for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                    if (!condicion)
                                     {
-                                        if (it->first == idPaisAtacado)
-                                        {
-                                            it->second++;
-                                        }
-                                    }
-                                    jugadores[j].setPaises(paises_jugador);
-                                }
-                            }
-
-                        }
-
-                        //Volver a asignar el map de paises
-                        jugadores[i].setPaises(paises_jugador);
-
-                        //Mostrar los cambios de ambos paises
-                        cout << "Pais del atacante: " << endl;
-                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                        {
-                            if (it->first == idPaisAtacante)
-                            {
-                                cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
-                            }
-                        }
-
-                        cout << "Pais del defensor: " << endl;
-                        
-                        //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
-                        for (int j = 0; j < jugadores.size(); j++)
-                        {
-                            if (jugadores[j].getTurno() != 1)
-                            {
-                                map<int, int> paises_jugador_2 = jugadores[j].getPaises();
-                                for (auto it = paises_jugador_2.begin(); it != paises_jugador_2.end(); it++)
-                                {
-                                    if (it->first == idPaisAtacado)
-                                    {
-                                        cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
+                                        cout << "Ingrese un id valido: ";
+                                        cin >> idPais;
                                     }
                                 }
-        
-                            }
+                            }  
                         }
 
+                        cout << "Se asignaron todos los paises" << endl;
+                    }
+                    
+                }
+
+                if (tokens.size() == 2)
+                {
+                    string archivo = tokens[1];
+                    cout << "Comando 'inicializar_nombre_archivo' ingresado para:" << archivo << endl;
                 
-                        //Si el pais del defensor tiene 0 ejercitos, se le asigna al atacante
-                        // Recorremos la lista de jugadores
-                        for (auto it = jugadores.begin(); it != jugadores.end(); ++it) 
+                    if ("Partida.txt" == archivo)
+                    {   
+                        cout << "Cargar partida txt" << endl;
+                        jugadores = cargarPartida("Partida.txt");
+
+                        //Cambiar el estado del vector de paises
+                        for (Pais &pais : paises)
                         {
-                            if (it->getTurno() !=1)
+                            pais.setEstado(1);
+                        }
+
+                        //Mostrar solo los jugadores
+                        for (int i = 0; i < jugadores.size(); i++)
+                        {
+                            cout << "Nombre: " << jugadores[i].getNombre() << endl;
+                            cout << "Turno: " << jugadores[i].getTurno() << endl;
+                            cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
+                            set <int> tarjetas = jugadores[i].getTarjetas();
+                            if (tarjetas.size() > 0)
                             {
-                                // Recorremos el map de paises de cada jugador
-                                map<int, int> paises_jugador_2 = it->getPaises();
-                                for (auto it2 = paises_jugador_2.begin(); it2 != paises_jugador_2.end(); ++it2) 
+                                cout << "Tarjetas: ";
+                                for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
                                 {
-                                    if (it2->first == idPaisAtacado && it2->second == 0)
-                                    {
-                                        cout << "El pais " << idPaisAtacado << " se le asigna al jugador " << jugadores[i].getNombre() << endl;
-                                        jugadores[i].agregarPais(idPaisAtacado, 1);
-                                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() - 1);
-                                        it->EliminarPais(idPaisAtacado);
+                                    cout << "Id: " << *it << ", "; 
+                                }
+                                cout << endl;
+                            }
+                            cout << "-------------------------" << endl;
+                        }
 
+                    }
+                
 
-                                        //Se informa al jugador que puede recibir una tarjeta
-                                        cout << "El jugador " << jugadores[i].getNombre() << " puede recibir una tarjeta" << endl;
+                    if ("Partida.bin" == archivo)
+                    {
+                        map<char, int> loaded_freq = DeserializeMap("map.data");
+                        Node *root2 = buildHuffmanTree(loaded_freq);
+            
+                        string nombreArchivo = "Partida.bin";
+                        // Leer desde el archivo binario y restaurar el string original
+                        string str= leerDesdeArchivoBinario(nombreArchivo);
 
-                                        for (int j = 0; j < tarjetas.size(); j++)
+                        decode_Huffman(root2, str);
+
+                        cout << "Cargar partida Bin" << endl;
+                        jugadores = cargarPartida("Decodificado.txt");
+
+                        //Cambiar el estado del vector de paises
+                        for (Pais &pais : paises)
+                        {
+                            pais.setEstado(1);
+                        }
+
+                        //Mostrar solo los jugadores
+                        for (int i = 0; i < jugadores.size(); i++)
+                        {
+                            cout << "Nombre: " << jugadores[i].getNombre() << endl;
+                            cout << "Turno: " << jugadores[i].getTurno() << endl;
+                            cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
+                            set <int> tarjetas = jugadores[i].getTarjetas();
+                            if (tarjetas.size() > 0)
+                            {
+                                cout << "Tarjetas: ";
+                                for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
+                                {
+                                    cout << "Id: " << *it << ", "; 
+                                }
+                                cout << endl;
+                            }
+                            cout << "-------------------------" << endl;
+                        }
+                    }
+                
+                }
+
+                else
+                {
+                    cout << "Comando 'inicializar' mal ejecutado" << endl;
+                }
+            }
+
+            else if (tokens[0] == "turno")
+            {
+                if (tokens.size() == 2)
+                {
+                    if (jugadores.size() == 0)
+                    {
+                        cout << "No se ha inicializado el juego." << endl;
+                    }
+
+                    else
+                    {
+
+                        if (2 == 2)
+                        {
+                            bool status = false;
+
+                            for (int i = 0; i < jugadores.size(); i++)
+                            {
+                                if (jugadores[i].getTurno() ==1 && jugadores[i].getNombre() == tokens[1])
+                                {
+
+                                    status = true;
+
+                                    if (1 == 1)
+                                    {                       
+                                        //Parte 1: Obtener y ubicar nuevas unidades de ejército.
+
+                                        cout << "Turno de " << jugadores[i].getNombre() << endl;
+                                        cout << "Ejercitos viejos: " << jugadores[i].getEjercitos() << endl;
+
+                                        //Territorios
+                                        int territorios = jugadores[i].getPaises().size();
+                                        int ejercitos = territorios / 3;
+                                        jugadores[i].setEjercitos(jugadores[i].getEjercitos() + ejercitos);
+
+                                        //Continentes
+                                        map<int, int> paises_jugador = jugadores[i].getPaises();
+                                        int America_N = 0;
+                                        int America_S = 0;
+                                        int Europa = 0;
+                                        int Asia = 0;
+                                        int Africa = 0;
+                                        int Australia = 0;
+                                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
                                         {
-                                            if (tarjetas[j].getID() == idPaisAtacado)
+                                            for (int j = 0; j < paises.size(); j++)
                                             {
-                                                cout << "El jugador " << jugadores[i].getNombre() << " recibe la tarjeta " << tarjetas[j].getTipo() << " de " << tarjetas[j].getPais() << endl;
-                                                jugadores[i].agregarTarjeta(tarjetas[j].getID());
-                                                tarjetas[j].setEstado(1);
-                                                break;
+                                                if (it->first == paises[j].getId())
+                                                {
+                                                    if (paises[j].getContinente() == "América del Norte")
+                                                    {
+                                                        America_N++;
+                                                    }
+                                                    else if (paises[j].getContinente() == "América del Sur")
+                                                    {
+                                                        America_S++;
+                                                    }
+                                                    else if (paises[j].getContinente() == "Europa")
+                                                    {
+                                                        Europa++;
+                                                    }
+                                                    else if (paises[j].getContinente() == "Asia")
+                                                    {
+                                                        Asia++;
+                                                    }
+                                                    else if (paises[j].getContinente() == "África")
+                                                    {
+                                                        Africa++;
+                                                    }
+                                                    else if (paises[j].getContinente() == "Australia")
+                                                    {
+                                                        Australia++;
+                                                    }
+                                                }
                                             }
                                         }
+
+                                        if (America_N == 9)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                                        }
+                                        else if (America_S == 4)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
+                                        }
+                                        else if (Europa == 7)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                                        }
+                                        else if (Asia == 12)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 7);
+                                        }
+                                        else if (Africa == 6)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 3);
+                                        }
+                                        else if (Australia == 4)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 2);
+                                        }
+
+                                        //Revisar tarjetas
+
+                                        set<int> tarjetas_j = jugadores[i].getTarjetas();
+                                        int cantidadTarjetas = tarjetas_j.size();
+
+                                        if (cantidadTarjetas >=3)
+                                        {
+                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() + 5);
+                                            //Eliminar solo las tres primeras tarjetas
+                                            int contador = 0;
+                                            for (auto it = tarjetas_j.begin(); it != tarjetas_j.end(); it++)
+                                            {
+                                                if (contador < 3)
+                                                {
+                                                    //Cambiar el estado de la tarjeta a 0
+                                                    for (int j = 0; j < tarjetas.size(); j++)
+                                                    {
+                                                        if (tarjetas[j].getID() == *it)
+                                                        {
+                                                            tarjetas[j].setEstado(0);
+                                                        }
+                                                    }
+
+                                                    jugadores[i].eliminarTarjeta(*it);
+                                                    contador++;
+                                                }
+                                            }
+                                        }
+
+
+                                        cout << "Ejercitos nuevos: " << jugadores[i].getEjercitos() << endl;
+
                                     }
-                                }
-                            }
-                        }
 
 
-                        //Mostrar los paises del jugador
-                        cout << "Id de los paises del jugador: ";
-                        jugadores[i].imprimirPaises();
+                                    if (2 == 2)
+                                    {
+                                        //Parte 2: Atacar
 
-                        cout << "Desear atacar? (1 = si, 0 = no): ";
-                        cin >> opcion;
+                                        cout << "Desear atacar? (1 = si, 0 = no): ";
+                                        int opcion;
+                                        cin >> opcion;
 
-                        while (opcion != 0 && opcion != 1)
-                        {
-                            cout << "Ingrese una opcion valida: ";
-                            cin >> opcion;
-                        }
+                                        while (opcion != 0 && opcion != 1)
+                                        {
+                                            cout << "Ingrese una opcion valida: ";
+                                            cin >> opcion;
+                                        }
 
-                        if (opcion == 0)
-                        {
-                            break;
-                        }
+                                        while (opcion ==1) 
+                                        {
+                                            map<int, int> paises_jugador = jugadores[i].getPaises();
 
-                    }
-                
-                
-                    //Parte 3: Mover ejercitos
+                                            //Mostrar paises del jugador
+                                            cout << "Paises del jugador: " << endl;
+                                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                            {
+                                                for (int j = 0; j < paises.size(); j++)
+                                                {
+                                                    if (it->first == paises[j].getId())
+                                                    {
+                                                        cout << "Id: " << paises[j].getId() << ". Nombre: " << paises[j].getNombre() << ". Ejercitos: " << it->second << endl;
+                                                    }
+                                                }
+                                            }
 
-                    cout << "Desear movee ejercitos? (1 = si, 0 = no): ";
-                    cin >> opcion;
-                    while (opcion != 0 && opcion != 1)
-                    {
-                        cout << "Ingrese una opcion valida: ";
-                        cin >> opcion;
-                    }
+                                            cout << "Ingrese el id del pais del que va a atacar: ";
+                                            int idPaisAtacante;
+                                            cin >> idPaisAtacante;
+                                            bool condicion = false;
+                                            while (!condicion)
+                                            {
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPaisAtacante)
+                                                    {
+                                                        condicion = true;
+                                                        break;
+                                                    }
+                                                }
 
-                    while (opcion == 1)
-                    {
-                        //Mostrar paises del jugador
-                        cout << "Paises del jugador: " << endl;
-                        map <int, int> paises_jugador = jugadores[i].getPaises();
-                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                        {
-                            for (int j = 0; j < paises.size(); j++)
-                            {
-                                if (it->first == paises[j].getId())
-                                {
-                                    cout << "Id: " << paises[j].getId() << ". Nombre: " << paises[j].getNombre() << ". Ejercitos: " << it->second << endl;
-                                }
-                            }
-                        }
+                                                if (!condicion)
+                                                {
+                                                    cout << "Ingrese un id valido: ";
+                                                    cin >> idPaisAtacante;
+                                                }
+                                            }
 
-                        cout << "Ingrese el id del pais del que va a mover: ";
-                        int idPaisMover;
-                        cin >> idPaisMover;
-                        bool condicion = false;
-                        while (!condicion)
-                        {
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPaisMover)
-                                {
-                                    condicion = true;
+                                            //Mostrar paises vecinos
+                                            cout << "Paises vecinos: " << endl;
+                                            vector<int> vecinos = paisesVecinos[idPaisAtacante];
+                                            for (int j = 0; j < vecinos.size(); j++)
+                                            {
+                                                for (int k = 0; k < paises.size(); k++)
+                                                {
+                                                    if (vecinos[j] == paises[k].getId())
+                                                    {
+                                                        cout << "Id: " << paises[k].getId() << ". Nombre: " << paises[k].getNombre() << endl;
+                                                    }
+                                                }
+                                            }
+
+                                            cout << "Ingrese el id del pais que va a atacar: ";
+                                            int idPaisAtacado;
+                                            cin >> idPaisAtacado;
+                                            condicion = false;
+                                            while (!condicion)
+                                            {
+                                                for (int j = 0; j < vecinos.size(); j++)
+                                                {
+                                                    if (vecinos[j] == idPaisAtacado)
+                                                    {
+                                                        condicion = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if (!condicion)
+                                                {
+                                                    cout << "Ingrese un id valido: ";
+                                                    cin >> idPaisAtacado;
+                                                }
+                                            }
+
+                                            //Sortear dados del atacante y defensor
+                                            vector<int> dadosAtacante;
+                                            vector<int> dadosDefensor;
+                                            int cantidadDadosAtacante = 3;
+                                            int cantidadDadosDefensor = 2;
+                                            
+                                            for (int j = 0; j < cantidadDadosAtacante; j++)
+                                            {
+                                                int dado = rand() % 6 + 1;
+                                                dadosAtacante.push_back(dado);
+                                            }
+
+                                            for (int j = 0; j < cantidadDadosDefensor; j++)
+                                            {
+                                                int dado = rand() % 6 + 1;
+                                                dadosDefensor.push_back(dado);
+                                            }
+
+                                            //Ordenar dados, no acepta el sort
+                                            for (int j = 0; j < dadosAtacante.size(); j++)
+                                            {
+                                                for (int k = 0; k < dadosAtacante.size() - 1; k++)
+                                                {
+                                                    if (dadosAtacante[k] < dadosAtacante[k + 1])
+                                                    {
+                                                        int aux = dadosAtacante[k];
+                                                        dadosAtacante[k] = dadosAtacante[k + 1];
+                                                        dadosAtacante[k + 1] = aux;
+                                                    }
+                                                }
+                                            }
+
+                                            for (int j = 0; j < dadosDefensor.size(); j++)
+                                            {
+                                                for (int k = 0; k < dadosDefensor.size() - 1; k++)
+                                                {
+                                                    if (dadosDefensor[k] < dadosDefensor[k + 1])
+                                                    {
+                                                        int aux = dadosDefensor[k];
+                                                        dadosDefensor[k] = dadosDefensor[k + 1];
+                                                        dadosDefensor[k + 1] = aux;
+                                                    }
+                                                }
+                                            }
+
+                                            //Mostrar dados
+                                            cout << "Dados del atacante: " << endl;
+                                            for (int j = 0; j < dadosAtacante.size(); j++)
+                                            {
+                                                cout << dadosAtacante[j] << ", ";
+                                            }
+                                            cout << endl;
+
+                                            cout << "Dados del defensor: " << endl;
+                                            for (int j = 0; j < dadosDefensor.size(); j++)
+                                            {
+                                                cout << dadosDefensor[j] << ", ";
+                                            }
+                                            cout << endl;
+                                            
+                                            //Sumar los dos primeros dados y definir el ganador y el perdedor
+                                            int sumaAtacante = dadosAtacante[0] + dadosAtacante[1];
+                                            int sumaDefensor = dadosDefensor[0] + dadosDefensor[1];
+
+                                            if (sumaAtacante > sumaDefensor)
+                                            {
+                                                cout << "Gana el atacante" << endl;
+
+                                                //Sumar un ejercito al pais del atacante
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPaisAtacante)
+                                                    {
+                                                        it->second++;
+                                                    }
+                                                }
+
+                                                //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
+                                                for (int j = 0; j < jugadores.size(); j++)
+                                                {
+                                                    if (jugadores[j].getTurno() != 1)
+                                                    {
+                                                        map<int, int> paises_jugador = jugadores[j].getPaises();
+                                                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                        {
+                                                            if (it->first == idPaisAtacado)
+                                                            {
+                                                                it->second--;
+                                                            }
+                                                        }
+                                                        jugadores[j].setPaises(paises_jugador);
+                                                    }
+                                                }
+
+                                            }
+
+                                            else
+                                            {
+                                                cout << "Gana el defensor" << endl;
+                                                
+                                                //Restar un ejercito al pais del atacante
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPaisAtacante)
+                                                    {
+                                                        it->second--;
+                                                    }
+                                                }
+
+                                                //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
+                                                for (int j = 0; j < jugadores.size(); j++)
+                                                {
+                                                    if (jugadores[j].getTurno() != 1)
+                                                    {
+                                                        map<int, int> paises_jugador = jugadores[j].getPaises();
+                                                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                        {
+                                                            if (it->first == idPaisAtacado)
+                                                            {
+                                                                it->second++;
+                                                            }
+                                                        }
+                                                        jugadores[j].setPaises(paises_jugador);
+                                                    }
+                                                }
+
+                                            }
+
+                                            //Volver a asignar el map de paises
+                                            jugadores[i].setPaises(paises_jugador);
+
+                                            //Mostrar los cambios de ambos paises
+                                            cout << "Pais del atacante: " << endl;
+                                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                            {
+                                                if (it->first == idPaisAtacante)
+                                                {
+                                                    cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
+                                                }
+                                            }
+
+                                            cout << "Pais del defensor: " << endl;
+                                            
+                                            //Recorrer los jugadores, excepto el del turno 1 y quitar una tropa al pais del defensor
+                                            for (int j = 0; j < jugadores.size(); j++)
+                                            {
+                                                if (jugadores[j].getTurno() != 1)
+                                                {
+                                                    map<int, int> paises_jugador_2 = jugadores[j].getPaises();
+                                                    for (auto it = paises_jugador_2.begin(); it != paises_jugador_2.end(); it++)
+                                                    {
+                                                        if (it->first == idPaisAtacado)
+                                                        {
+                                                            cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
+                                                        }
+                                                    }
+                            
+                                                }
+                                            }
+
+                                    
+                                            //Si el pais del defensor tiene 0 ejercitos, se le asigna al atacante
+                                            // Recorremos la lista de jugadores
+                                            for (auto it = jugadores.begin(); it != jugadores.end(); ++it) 
+                                            {
+                                                if (it->getTurno() !=1)
+                                                {
+                                                    // Recorremos el map de paises de cada jugador
+                                                    map<int, int> paises_jugador_2 = it->getPaises();
+                                                    for (auto it2 = paises_jugador_2.begin(); it2 != paises_jugador_2.end(); ++it2) 
+                                                    {
+                                                        if (it2->first == idPaisAtacado && it2->second == 0)
+                                                        {
+                                                            cout << "El pais " << idPaisAtacado << " se le asigna al jugador " << jugadores[i].getNombre() << endl;
+                                                            jugadores[i].agregarPais(idPaisAtacado, 1);
+                                                            jugadores[i].setEjercitos(jugadores[i].getEjercitos() - 1);
+                                                            it->EliminarPais(idPaisAtacado);
+
+
+                                                            //Se informa al jugador que puede recibir una tarjeta
+                                                            cout << "El jugador " << jugadores[i].getNombre() << " puede recibir una tarjeta" << endl;
+
+                                                            for (int j = 0; j < tarjetas.size(); j++)
+                                                            {
+                                                                if (tarjetas[j].getID() == idPaisAtacado)
+                                                                {
+                                                                    cout << "El jugador " << jugadores[i].getNombre() << " recibe la tarjeta " << tarjetas[j].getTipo() << " de " << tarjetas[j].getPais() << endl;
+                                                                    jugadores[i].agregarTarjeta(tarjetas[j].getID());
+                                                                    tarjetas[j].setEstado(1);
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+
+                                            //Mostrar los paises del jugador
+                                            cout << "Id de los paises del jugador: ";
+                                            jugadores[i].imprimirPaises();
+
+                                            cout << "Desear atacar? (1 = si, 0 = no): ";
+                                            cin >> opcion;
+
+                                            while (opcion != 0 && opcion != 1)
+                                            {
+                                                cout << "Ingrese una opcion valida: ";
+                                                cin >> opcion;
+                                            }
+
+                                            if (opcion == 0)
+                                            {
+                                                break;
+                                            }
+
+                                        }
+                                    
+                                    }
+
+
+                                    if (3 == 3)
+                                    {
+                                        //Parte 3: Mover ejercitos
+
+                                        cout << "Desear movee ejercitos? (1 = si, 0 = no): ";
+                                        int opcion;
+                                        cin >> opcion;
+                                        while (opcion != 0 && opcion != 1)
+                                        {
+                                            cout << "Ingrese una opcion valida: ";
+                                            cin >> opcion;
+                                        }
+
+                                        while (opcion == 1)
+                                        {
+                                            //Mostrar paises del jugador
+                                            cout << "Paises del jugador: " << endl;
+                                            map <int, int> paises_jugador = jugadores[i].getPaises();
+                                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                            {
+                                                for (int j = 0; j < paises.size(); j++)
+                                                {
+                                                    if (it->first == paises[j].getId())
+                                                    {
+                                                        cout << "Id: " << paises[j].getId() << ". Nombre: " << paises[j].getNombre() << ". Ejercitos: " << it->second << endl;
+                                                    }
+                                                }
+                                            }
+
+                                            cout << "Ingrese el id del pais del que va a mover: ";
+                                            int idPaisMover;
+                                            cin >> idPaisMover;
+                                            bool condicion = false;
+                                            while (!condicion)
+                                            {
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPaisMover)
+                                                    {
+                                                        condicion = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if (!condicion)
+                                                {
+                                                    cout << "Ingrese un id valido: ";
+                                                    cin >> idPaisMover;
+                                                }
+                                            }
+
+                                            //Mostrar paises vecinos del pais a mover y que sean propios
+                                            cout << "Paises vecinos: " << endl;
+                                            bool condicion2 = false;
+                                            vector<int> vecinos = paisesVecinos[idPaisMover];
+                                            for (int j = 0; j < vecinos.size(); j++)
+                                            {
+                                                for (int k = 0; k < paises.size(); k++)
+                                                {
+                                                    if (vecinos[j] == paises[k].getId())
+                                                    {
+                                                        for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                        {
+                                                            if (it->first == vecinos[j])
+                                                            {
+                                                                cout << "Id: " << paises[k].getId() << ". Nombre: " << paises[k].getNombre() << ". Ejercitos: " << it->second << endl;
+                                                                condicion2 = true;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (!condicion2)
+                                            {
+                                                cout << "No hay paises vecinos propios" << endl;
+                                                break;
+                                            }
+
+                                            else 
+                                            {
+                                                cout << "Ingrese el id del pais al que va a mover: ";
+                                                int idPais;
+                                                cin >> idPais;
+                                                condicion = false;
+                                                while (!condicion)
+                                                {
+                                                    for (int j = 0; j < vecinos.size(); j++)
+                                                    {
+                                                        if (vecinos[j] == idPais)
+                                                        {
+                                                            condicion = true;
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    if (!condicion)
+                                                    {
+                                                        cout << "Ingrese un id valido: ";
+                                                        cin >> idPais;
+                                                    }
+                                                }
+
+                                                cout << "Digite la cantidad de ejercitos a mover: ";
+                                                int cantidadEjercitos;
+                                                cin >> cantidadEjercitos;
+                                                map<int, int>::iterator it;
+                                                it=paises_jugador.find(idPaisMover);
+                                                while (cantidadEjercitos > it->second)
+                                                {
+                                                    cout << "Ingrese una cantidad valida: ";
+                                                    cin >> cantidadEjercitos;
+                                                }
+
+                                                //Cambiar la cantidad de ejercitos del pais a mover
+                                                it->second = it->second - cantidadEjercitos;
+                                                it=paises_jugador.find(idPais);
+                                                it->second = it->second + cantidadEjercitos;
+
+                                                //Volver a asignar el map de paises
+                                                jugadores[i].setPaises(paises_jugador);
+
+                                                //Mostrar los cambios de ambos paises
+                                                cout << "Pais del que se mueven los ejercitos: " << endl;
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPaisMover)
+                                                    {
+                                                        cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
+                                                    }
+                                                }
+
+                                                cout << "Pais al que se mueven los ejercitos: " << endl;
+                                                for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
+                                                {
+                                                    if (it->first == idPais)
+                                                    {
+                                                        cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
+                                                    }
+                                                }
+                                            }
+
+                                            cout << "Desear seguir moviendo ejercitos? (1 = si, 0 = no): ";
+                                            cin >> opcion;
+                                            while (opcion != 0 && opcion != 1)
+                                            {
+                                                cout << "Ingrese una opcion valida: ";
+                                                cin >> opcion;
+                                            }
+
+                                            if (opcion == 0)
+                                            {
+                                                break;
+                                            }
+
+
+                                        }
+
+                                    }
+
+                                    //Parte 4: Cambiar turnos
+                                    for (int j = 0; j < jugadores.size(); j++)
+                                    {
+                                        if (jugadores[j].getTurno() == 1)
+                                        {
+                                            jugadores[j].setTurno(jugadores.size());
+                                        }
+                                        else
+                                        {
+                                            jugadores[j].setTurno(jugadores[j].getTurno() - 1);
+                                        }
+                                    }
+
+
+                                    //Verificar si el jugador gano
+                                    if (jugadores[i].getPaises().size() == paises.size())
+                                    {
+                                        cout << "El jugador " << jugadores[i].getNombre() << " ha ganado" << endl;
+                                        return 0;
+                                    }
+
                                     break;
                                 }
                             }
 
-                            if (!condicion)
+                            if (!status)
                             {
-                                cout << "Ingrese un id valido: ";
-                                cin >> idPaisMover;
+                                cout << "No es tu turno, o no existe el jugador" << endl;
                             }
-                        }
-
-                        //Mostrar paises vecinos del pais a mover y que sean propios
-                        cout << "Paises vecinos: " << endl;
-                        bool condicion2 = false;
-                        vector<int> vecinos = paisesVecinos[idPaisMover];
-                        for (int j = 0; j < vecinos.size(); j++)
-                        {
-                            for (int k = 0; k < paises.size(); k++)
-                            {
-                                if (vecinos[j] == paises[k].getId())
-                                {
-                                    for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                                    {
-                                        if (it->first == vecinos[j])
-                                        {
-                                            cout << "Id: " << paises[k].getId() << ". Nombre: " << paises[k].getNombre() << ". Ejercitos: " << it->second << endl;
-                                            condicion2 = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!condicion2)
-                        {
-                            cout << "No hay paises vecinos propios" << endl;
-                            break;
-                        }
-
-                        else 
-                        {
-                            cout << "Ingrese el id del pais al que va a mover: ";
-                            int idPais;
-                            cin >> idPais;
-                            condicion = false;
-                            while (!condicion)
-                            {
-                                for (int j = 0; j < vecinos.size(); j++)
-                                {
-                                    if (vecinos[j] == idPais)
-                                    {
-                                        condicion = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!condicion)
-                                {
-                                    cout << "Ingrese un id valido: ";
-                                    cin >> idPais;
-                                }
-                            }
-
-                            cout << "Digite la cantidad de ejercitos a mover: ";
-                            int cantidadEjercitos;
-                            cin >> cantidadEjercitos;
-                            map<int, int>::iterator it;
-                            it=paises_jugador.find(idPaisMover);
-                            while (cantidadEjercitos > it->second)
-                            {
-                                cout << "Ingrese una cantidad valida: ";
-                                cin >> cantidadEjercitos;
-                            }
-
-                            //Cambiar la cantidad de ejercitos del pais a mover
-                            it->second = it->second - cantidadEjercitos;
-                            it=paises_jugador.find(idPais);
-                            it->second = it->second + cantidadEjercitos;
-
-                            //Volver a asignar el map de paises
-                            jugadores[i].setPaises(paises_jugador);
-
-                            //Mostrar los cambios de ambos paises
-                            cout << "Pais del que se mueven los ejercitos: " << endl;
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPaisMover)
-                                {
-                                    cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
-                                }
-                            }
-
-                            cout << "Pais al que se mueven los ejercitos: " << endl;
-                            for (auto it = paises_jugador.begin(); it != paises_jugador.end(); it++)
-                            {
-                                if (it->first == idPais)
-                                {
-                                    cout << "Id: " << it->first << ". Ejercitos: " << it->second << endl;
-                                }
-                            }
-                        }
-
-                        cout << "Desear seguir moviendo ejercitos? (1 = si, 0 = no): ";
-                        cin >> opcion;
-                        while (opcion != 0 && opcion != 1)
-                        {
-                            cout << "Ingrese una opcion valida: ";
-                            cin >> opcion;
-                        }
-
-                        if (opcion == 0)
-                        {
-                            break;
-                        }
-
-
+                        }   
+                        
                     }
+              
+                }
 
+                else
+                {
+                    cout << "Comando 'turno' incompleto. Debe proporcionar un <id_jugador>." << endl;
+                }
 
-                    //Parte 4: Cambiar turnos
-                    for (int j = 0; j < jugadores.size(); j++)
-                    {
-                        if (jugadores[j].getTurno() == 1)
-                        {
-                            jugadores[j].setTurno(jugadores.size());
-                        }
-                        else
-                        {
-                            jugadores[j].setTurno(jugadores[j].getTurno() - 1);
-                        }
-                    }
+                //Arregal el buffer de entrada
+                cin.clear();
+                cin.ignore();
+            }
 
-
-                    //Verificar si el jugador gano
-                    if (jugadores[i].getPaises().size() == paises.size())
-                    {
-                        cout << "El jugador " << jugadores[i].getNombre() << " ha ganado" << endl;
-                        return 0;
-                    }
-
+            else if (tokens[0] == "salir")
+            {
+                if (tokens.size() > 1)
+                {
+                    cout << "El comando 'salir' no debe tener argumentos adicionales." << endl;
+                }
+                else
+                {
+                    cout << "Comando 'salir' ingresado." << endl;
                     break;
                 }
             }
 
+            //Componente 2: almacenamiento de partidas
 
-
-        }   
-
-
-        if (opcion == 3)
-        {
-            cout << "Guardar partida" << endl;
-            guardarPartida(jugadores);
-        } 
-
-
-        if (opcion == 4)
-        {
-            cout << "Cargar partida txt" << endl;
-            jugadores = cargarPartida("Partida.txt");
-
-            //Cambiar el estado del vector de paises
-            for (Pais &pais : paises)
+            else if (tokens[0] == "guardar")
             {
-                pais.setEstado(1);
-            }
-
-            //Mostrar solo los jugadores
-            for (int i = 0; i < jugadores.size(); i++)
-            {
-                cout << "Nombre: " << jugadores[i].getNombre() << endl;
-                cout << "Turno: " << jugadores[i].getTurno() << endl;
-                cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
-                set <int> tarjetas = jugadores[i].getTarjetas();
-                if (tarjetas.size() > 0)
+                if (tokens.size() == 2)
                 {
-                    cout << "Tarjetas: ";
-                    for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
+                    string archivo = tokens[1];
+                    cout << "Comando 'guardar' ingresado para:" << archivo << endl;
+
+                    if ("Partida.txt" == archivo)
                     {
-                        cout << "Id: " << *it << ", "; 
+                        cout << "Guardar partida" << endl;
+                        guardarPartida(jugadores);
+                        cout << "Partida guardada" << endl;
                     }
-                    cout << endl;
+
                 }
-                cout << "-------------------------" << endl;
+                else
+                {
+                    cout << "Comando 'guardar' incompleto. Debe proporcionar un archivo." << endl;
+                }
             }
-        }
+
+            else if (tokens[0] == "guardar_comprimido")
+            {
+                if (tokens.size() == 2)
+                {
+                    string archivo = tokens[1];
+                    cout << "Comando 'guardar_comprimido' ingresado para:" << archivo << endl;
+                    
+                    if ("Partida.bin" == archivo)
+                    {
+                        cout << "Guardar partida" << endl;
+                        guardarPartida(jugadores);
+
+                        string filename = "Partida.txt";  // Nombre del archivo de entrada
+                        string text = readFromFile(filename);  // Leer contenido del archivo
+
+                        HuffmanResult result = buildHuffmanTree(text);
+                        Node* root = result.root;
+                        map<char, int> huffmanCodes = result.huffmanCodes;
+
+                        string str = Huffman_codes(root, text);
+
+                        string nombreArchivo = "Partida.bin";
+                        // Guardar el string binario en un archivo binario
+                        guardarEnArchivoBinario(str, nombreArchivo);
+                    
+                        // Serializar el mapa
+                        SerializeMap(huffmanCodes, "map.data");
+                    }
+                
+                }
+                else
+                {
+                    cout << "Comando 'guardar_comprimido' incompleto. Debe proporcionar un archivo." << endl;
+                }
+            }
 
 
-        if (opcion == 5)
-        {
-            cout << "Guardar partida" << endl;
-            guardarPartida(jugadores);
 
-            string filename = "Partida.txt";  // Nombre del archivo de entrada
-            string text = readFromFile(filename);  // Leer contenido del archivo
+            //Componente 3: estrategias de juego
 
-            HuffmanResult result = buildHuffmanTree(text);
-            Node* root = result.root;
-            map<char, int> huffmanCodes = result.huffmanCodes;
+            else if (tokens[0] == "costo_conquista")
+            {
+                if (tokens.size() == 2)
+                {
+                    string territorio = tokens[1];
+                    cout << "Comando 'costo_conquista' ingresado para:" << territorio << endl;
+                }
+                else
+                {
+                    cout << "Comando 'costo_conquista' incompleto. Debe proporcionar un territorio." << endl;
+                }
+            }
 
-            string str = Huffman_codes(root, text);
+            else if (tokens[0] == "conquista_mas_barata")
+            {
+                if (tokens.size() > 1)
+                {
+                    cout << "El comando 'conquista_mas_barata' no debe tener argumentos adicionales." << endl;
+                }
+                else
+                {
+                    cout << "Comando 'conquista_mas_barata' ingresado." << endl;
+                }
+            } 
 
-            string nombreArchivo = "Partida.bin";
-            // Guardar el string binario en un archivo binario
-            guardarEnArchivoBinario(str, nombreArchivo);
+            //Ayuda
+
+            else if (tokens[0] == "ayuda")
+            {
+                if (tokens.size() > 3)
+                {
+                    cout << "El comando 'ayuda' no debe tener argumentos adicionales." << endl;
+                }
+                else
+                {
+                    if (tokens.size() == 1)
+                    {
+                        menu_ayuda();
+                    }
+                    
+                    else if (tokens[1] == "inicializar") 
+                    {
+                        inicializar();
+                    } 
+                    
+                    else if (tokens[1] == "turno") 
+                    {
+                        turno();
+                    } 
+
+                    else if (tokens[1] == "guardar")  
+                    {
+                        guardar();
+                    } 
+
+                    else if (tokens[1] == "guardar_comprimido") 
+                    {
+                        guardar_comprimido();
+                    } 
+
+                    else if (tokens[1] == "inicializar_nombre_archivo")  
+                    {
+                        inicializar_nombre_archivo();
+                    } 
+
+                    else if (tokens[1] == "costo_conquista") 
+                    {
+                        costo_conquista();
+                    } 
+
+                    else if (tokens[1] == "conquista_mas_barata")
+                    {
+                        conquista_mas_barata();
+                    } 
+
+                    else
+                    {
+                        cout << " Digito mal,Bye :)" <<endl;
+                    }
+
+                }
+            }
+            
+
+            //Comprobar
+            else
+            {
+                cout << "Comando no reconocido." << endl;
+            }
         
-            // Serializar el mapa
-            SerializeMap(huffmanCodes, "map.data");
-        }
-
-        if (opcion ==6)
-        {
-            map<char, int> loaded_freq = DeserializeMap("map.data");
-            Node *root2 = buildHuffmanTree(loaded_freq);
-            
-            string nombreArchivo = "Partida.bin";
-            // Leer desde el archivo binario y restaurar el string original
-            string str= leerDesdeArchivoBinario(nombreArchivo);
-
-            decode_Huffman(root2, str);
-
-            cout << "Cargar partida Bin" << endl;
-            jugadores = cargarPartida("Decodificado.txt");
-
-            //Cambiar el estado del vector de paises
-            for (Pais &pais : paises)
-            {
-                pais.setEstado(1);
-            }
-
-            //Mostrar solo los jugadores
-            for (int i = 0; i < jugadores.size(); i++)
-            {
-                cout << "Nombre: " << jugadores[i].getNombre() << endl;
-                cout << "Turno: " << jugadores[i].getTurno() << endl;
-                cout << "Ejercitos: " << jugadores[i].getEjercitos() << endl;
-                set <int> tarjetas = jugadores[i].getTarjetas();
-                if (tarjetas.size() > 0)
-                {
-                    cout << "Tarjetas: ";
-                    for (auto it = tarjetas.begin(); it != tarjetas.end(); it++)
-                    {
-                        cout << "Id: " << *it << ", "; 
-                    }
-                    cout << endl;
-                }
-                cout << "-------------------------" << endl;
-            }
-
-            
-            
 
         }
-
-        opcion = menu();
     }
-
-
-
-
 
     return 0;
 }
