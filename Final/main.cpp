@@ -254,6 +254,7 @@ string readFromFile(const string& filename) {
     return content;
 }
 
+
 // Función para serializar un map<char, int> a un archivo binario
 void SerializeMap(const map<char, int>& map, const string& filename) {
     ofstream outfile(filename, ios::binary);
@@ -279,33 +280,6 @@ map<char, int> DeserializeMap(const string& filename) {
     return loaded_map;
 }
 
-
-// Función para serializar un map<int, int> usando valores ASCII de caracteres
-void SerializeMap(const map<int, int>& map, const string& filename) {
-    ofstream outfile(filename, ios::binary);
-    vector<pair<int, int>> pairs(map.begin(), map.end()); // Copia pares clave-valor en un vector
-    for (const auto& pair : pairs) {
-        outfile.write(reinterpret_cast<const char*>(&pair.first), sizeof(int));
-        outfile.write(reinterpret_cast<const char*>(&pair.second), sizeof(int));
-    }
-    outfile.close();
-}
-
-// Función para deserializar un map<int, int> y convertirlo en un map<char, int> con caracteres ASCII
-map<char, int> DeserializeMap(const string& filename) {
-    ifstream infile(filename, ios::binary);
-    map<char, int> loaded_map;
-    int key;
-    int value;
-    while (infile.read(reinterpret_cast<char*>(&key), sizeof(int)) &&
-           infile.read(reinterpret_cast<char*>(&value), sizeof(int))) {
-        // Convertir clave (valor ASCII) a un carácter
-        char character = static_cast<char>(key);
-        loaded_map[character] = value;
-    }
-    infile.close();
-    return loaded_map;
-}
 
 // Función para guardar un string binario en un archivo binario
 void guardarEnArchivoBinario(const string& str, const string& nombreArchivo) {
