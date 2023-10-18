@@ -31,14 +31,6 @@
         {
             this->ejercitos = ejercitos;
         }
-        int Jugador::getDado()
-        {
-            return dado;
-        }
-        void Jugador::setDado(int dado)
-        {
-            this->dado = dado;
-        }
 
         void Jugador::agregarPais(int id, int ejercitos)
         {
