@@ -100,7 +100,7 @@ public:
     }
 
     void imprimirGrafo() {
-    for (int i = 0; i < nodos.size(); i++) {
+        for (int i = 0; i < nodos.size(); i++) {
         cout << nodos[i] << " -> ";
         for (int j = 0; j < nodos.size(); j++) {
             if (matrizAdyacencia[i][j] == 1) {
@@ -108,7 +108,7 @@ public:
             }
         }
         cout << endl;
-    }
+        }
     }
 
     //Recorridos
@@ -169,17 +169,85 @@ public:
         }
     }
 
+    // Caminos de Hamilton
+
+    void caminosHamilton() {
+        vector<int> camino(cantidadVertices(), -1);
+        camino[0] = 0; // Comenzamos desde el primer nodo
+        vector<bool> visitado(cantidadVertices(), false);
+
+        caminoHamiltonUtil(camino, visitado, 1);
+    }
+
+    bool caminoHamiltonUtil(vector<int>& camino, vector<bool>& visitado, int pos) {
+        if (pos == cantidadVertices()) {
+            // Se ha encontrado un camino de Hamilton
+            if (matrizAdyacencia[camino[pos - 1]][camino[0]] == 1) {
+                imprimirCamino(camino);
+            }
+            return false;
+        }
+
+        bool encontrado = false;
+
+        for (int v = 1; v < cantidadVertices(); v++) {
+            if (esValido(v, camino, visitado, pos)) {
+                camino[pos] = v;
+                visitado[v] = true;
+
+                caminoHamiltonUtil(camino, visitado, pos + 1);
+
+                // Retroceder
+                camino[pos] = -1;
+                visitado[v] = false;
+            }
+        }
+
+        return encontrado;
+    }
+
+    bool esValido(int v, vector<int>& camino, vector<bool>& visitado, int pos) {
+        if (matrizAdyacencia[camino[pos - 1]][v] == 0)
+            return false;
+
+        if (visitado[v])
+            return false;
+
+        return true;
+    }
+
+    void imprimirCamino(const vector<int>& camino) {
+        cout << "Camino de Hamilton encontrado: ";
+        for (int v : camino) {
+            cout << nodos[v] << " ";
+        }
+        cout << nodos[camino[0]] << endl;
+    }
+
+    // Caminos de Euler
+
+
+
+
+
+
 private:
     map<T, int> nodosMap; // Mapeo de nodos a índices
     vector<T> nodos;
     vector<vector<int>> matrizAdyacencia;
 };
 
+
+
+
+
+
 int main() {
     GrafoNoDirigido<string> grafo;
 
     int opcion;
     string nodo, origen, destino;
+
     do {
         cout << "Menú:" << endl;
         cout << "1. Agregar nodo" << endl;
@@ -195,6 +263,9 @@ int main() {
         cout << "11. Recorrido en profundidad" << endl;
         cout << "12. Recorrido en anchura" << endl;
         cout << "13. Recorrido plano" << endl;
+        cout << "14. Caminos de Hamilton" << endl;
+        cout << "15. Caminos de Euler" << endl;
+        cout << "16. Prueba" << endl;
         cout << "0. Salir" << endl;
         cout << "Elija una opción: ";
         cin >> opcion;
@@ -275,6 +346,34 @@ int main() {
             case 13:
                 grafo.recorridoPlano();
                 cout << endl;
+                break;
+            
+            case 14:
+                grafo.caminosHamilton();
+                break;
+
+            case 15:
+                grafo.caminosEuler();
+                break;
+
+            case 16:
+                grafo.agregarNodo("A");
+                grafo.agregarNodo("B");
+                grafo.agregarNodo("C");
+                grafo.agregarNodo("D");
+                grafo.agregarNodo("E");
+                grafo.agregarNodo("F");
+
+                grafo.agregarArista("A","B");
+                grafo.agregarArista("A","C");
+                grafo.agregarArista("A","D");
+                grafo.agregarArista("B","D");
+                grafo.agregarArista("B","C");
+                grafo.agregarArista("C","E");
+                grafo.agregarArista("C","F");
+                grafo.agregarArista("D","E");
+                grafo.agregarArista("D","F");
+
                 break;
             case 0:
                 break;
