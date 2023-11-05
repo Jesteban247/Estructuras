@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -171,64 +172,213 @@ public:
 
     // Caminos de Hamilton
 
-    void caminosHamilton() {
-        vector<int> camino(cantidadVertices(), -1);
-        camino[0] = 0; // Comenzamos desde el primer nodo
-        vector<bool> visitado(cantidadVertices(), false);
-
-        caminoHamiltonUtil(camino, visitado, 1);
-    }
-
-    bool caminoHamiltonUtil(vector<int>& camino, vector<bool>& visitado, int pos) {
-        if (pos == cantidadVertices()) {
-            // Se ha encontrado un camino de Hamilton
-            if (matrizAdyacencia[camino[pos - 1]][camino[0]] == 1) {
-                imprimirCamino(camino);
-            }
-            return false;
+    // Función auxiliar para el algoritmo de Hamilton
+    bool encontrarCaminoHamiltonRecursivo(vector<int>& camino, vector<bool>& visitado, int nodoActual) {
+        if (camino.size() == nodos.size()) {
+            // Se encontró un camino de Hamilton
+            return true;
         }
 
-        bool encontrado = false;
+        for (int i = 0; i < nodos.size(); i++) {
+            if (matrizAdyacencia[nodoActual][i] == 1 && !visitado[i]) {
+                visitado[i] = true;
+                camino.push_back(i);
 
-        for (int v = 1; v < cantidadVertices(); v++) {
-            if (esValido(v, camino, visitado, pos)) {
-                camino[pos] = v;
-                visitado[v] = true;
+                if (encontrarCaminoHamiltonRecursivo(camino, visitado, i)) {
+                    return true;
+                }
 
-                caminoHamiltonUtil(camino, visitado, pos + 1);
-
-                // Retroceder
-                camino[pos] = -1;
-                visitado[v] = false;
+                visitado[i] = false;
+                camino.pop_back();
             }
         }
 
-        return encontrado;
+        return false;
     }
 
-    bool esValido(int v, vector<int>& camino, vector<bool>& visitado, int pos) {
-        if (matrizAdyacencia[camino[pos - 1]][v] == 0)
+    // Función para encontrar un camino de Hamilton en el grafo
+    bool encontrarCaminoHamilton() {
+        vector<int> camino;
+        vector<bool> visitado(nodos.size(), false);
+
+        // Comenzar desde el primer nodo
+        int nodoInicial = 0;
+        camino.push_back(nodoInicial);
+        visitado[nodoInicial] = true;
+
+        if (encontrarCaminoHamiltonRecursivo(camino, visitado, nodoInicial)) {
+            // Se encontró un camino de Hamilton, imprímelo
+            cout << "Camino de Hamilton encontrado: ";
+            for (int nodo : camino) {
+                cout << nodos[nodo] << " ";
+            }
+            cout << endl;
+            return true;
+        } else {
+            cout << "No se encontró un camino de Hamilton en el grafo." << endl;
             return false;
-
-        if (visitado[v])
-            return false;
-
-        return true;
-    }
-
-    void imprimirCamino(const vector<int>& camino) {
-        cout << "Camino de Hamilton encontrado: ";
-        for (int v : camino) {
-            cout << nodos[v] << " ";
         }
-        cout << nodos[camino[0]] << endl;
     }
+
+
+    // Ciclos de Hamilton
+
+    // Función auxiliar para el algoritmo de Hamilton
+    bool encontrarCicloHamiltonRecursivo(vector<int>& ciclo, vector<bool>& visitado, int nodoActual, int nodoInicial) {
+        if (ciclo.size() == nodos.size()) {
+            // Se encontró un ciclo de Hamilton
+            if (matrizAdyacencia[nodoActual][nodoInicial] == 1) {
+                ciclo.push_back(nodoInicial);
+                return true;
+            }
+        }
+
+        for (int i = 0; i < nodos.size(); i++) {
+            if (matrizAdyacencia[nodoActual][i] == 1 && !visitado[i]) {
+                visitado[i] = true;
+                ciclo.push_back(i);
+
+                if (encontrarCicloHamiltonRecursivo(ciclo, visitado, i, nodoInicial)) {
+                    return true;
+                }
+
+                visitado[i] = false;
+                ciclo.pop_back();
+            }
+        }
+
+        return false;
+    }
+
+    // Función para encontrar un ciclo de Hamilton en el grafo
+    bool encontrarCicloHamilton() {
+        vector<int> ciclo;
+        vector<bool> visitado(nodos.size(), false);
+
+        // Comenzar desde el primer nodo
+        int nodoInicial = 0;
+        ciclo.push_back(nodoInicial);
+        visitado[nodoInicial] = true;
+
+        if (encontrarCicloHamiltonRecursivo(ciclo, visitado, nodoInicial, nodoInicial)) {
+            // Se encontró un ciclo de Hamilton, imprímelo
+            cout << "Ciclo de Hamilton encontrado: ";
+            for (int nodo : ciclo) {
+                cout << nodos[nodo] << " ";
+            }
+            cout << endl;
+            return true;
+        } else {
+            cout << "No se encontró un ciclo de Hamilton en el grafo." << endl;
+            return false;
+        }
+    }
+
 
     // Caminos de Euler
 
+    int gradoVertice(int indiceNodo) {
+        int grado = 0;
+        for (int i = 0; i < nodos.size(); i++) {
+            if (matrizAdyacencia[indiceNodo][i] == 1) {
+                grado++;
+            }
+        }
+        return grado;
+    }
+
+    // Función auxiliar para el algoritmo de Euler
+    bool encontrarCaminoEulerRecursivo(vector<int>& camino, vector<vector<int>>& copiaMatrizAdyacencia, int nodoActual) {
+        for (int i = 0; i < nodos.size(); i++) {
+            if (copiaMatrizAdyacencia[nodoActual][i] == 1) {
+                copiaMatrizAdyacencia[nodoActual][i] = 0;
+                copiaMatrizAdyacencia[i][nodoActual] = 0;
+                camino.push_back(i);
+
+                if (camino.size() == (cantidadAristas() + 1)) {
+                    return true;  // Se encontró un camino de Euler
+                }
+
+                if (encontrarCaminoEulerRecursivo(camino, copiaMatrizAdyacencia, i)) {
+                    return true;
+                }
+
+                camino.pop_back();
+                copiaMatrizAdyacencia[nodoActual][i] = 1;
+                copiaMatrizAdyacencia[i][nodoActual] = 1;
+            }
+        }
+
+        return false;
+    }
+
+    // Función para encontrar un camino de Euler en el grafo
+    bool encontrarCaminoEuler() {
+        vector<int> camino;
+
+        // Buscar un nodo inicial para comenzar el camino
+        int nodoInicial = 0;
+        for (int i = 0; i < cantidadVertices(); i++) {
+            if (gradoVertice(i) > 0) {
+                nodoInicial = i;
+                break;
+            }
+        }
+
+        camino.push_back(nodoInicial);
+
+        // Copiar la matriz de adyacencia para marcar aristas visitadas
+        vector<vector<int>> copiaMatrizAdyacencia = matrizAdyacencia;
+
+        if (encontrarCaminoEulerRecursivo(camino, copiaMatrizAdyacencia, nodoInicial)) {
+            // Se encontró un camino de Euler, imprímelo
+            cout << "Camino de Euler encontrado: ";
+            for (int nodo : camino) {
+                cout << nodos[nodo] << " ";
+            }
+            cout << endl;
+            return true;
+        } else {
+            cout << "No se encontró un camino de Euler en el grafo." << endl;
+            return false;
+        }
+    }
 
 
+    // Ciclos de Euler
 
+    // Función para encontrar un ciclo de Euler en el grafo
+    bool encontrarCicloEuler() {
+        vector<int> ciclo;
+
+        // Copiar la matriz de adyacencia para marcar aristas visitadas
+        vector<vector<int>> copiaMatrizAdyacencia = matrizAdyacencia;
+
+        // Buscar un nodo inicial para comenzar el ciclo
+        int nodoInicial = 0;
+        for (int i = 0; i < cantidadVertices(); i++) {
+            if (gradoVertice(i) > 0) {
+                nodoInicial = i;
+                break;
+            }
+        }
+
+        if (encontrarCaminoEulerRecursivo(ciclo, copiaMatrizAdyacencia, nodoInicial)) {
+            // Verificar si el ciclo encontrado es un ciclo de Euler
+            if (ciclo.size() == (cantidadAristas() + 1) && copiaMatrizAdyacencia[nodoInicial][ciclo.back()] == 1) {
+                // Se encontró un ciclo de Euler, imprímelo
+                cout << "Ciclo de Euler encontrado: ";
+                for (int nodo : ciclo) {
+                    cout << nodos[nodo] << " ";
+                }
+                cout << endl;
+                return true;
+            }
+        }
+
+        cout << "No se encontró un ciclo de Euler en el grafo." << endl;
+        return false;
+    }
 
 
 private:
@@ -236,10 +386,6 @@ private:
     vector<T> nodos;
     vector<vector<int>> matrizAdyacencia;
 };
-
-
-
-
 
 
 int main() {
@@ -349,11 +495,13 @@ int main() {
                 break;
             
             case 14:
-                grafo.caminosHamilton();
+                grafo.encontrarCaminoHamilton();
+                grafo.encontrarCicloHamilton();
                 break;
 
             case 15:
-                grafo.caminosEuler();
+                grafo.encontrarCaminoEuler();
+                grafo.encontrarCicloEuler();
                 break;
 
             case 16:
