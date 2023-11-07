@@ -27,6 +27,8 @@
 
 
 //Funcion de Recorrido
+    // Es parecido al de Prim profe, pero le hicimos cambios para que recorra uno por uno
+    // Y tambien parte del de Hamilton
     template <class T>
     vector<T> GrafoNoDirigido<T>::Recorrido(const T& nodoInicio)
     {

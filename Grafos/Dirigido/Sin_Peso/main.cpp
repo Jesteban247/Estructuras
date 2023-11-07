@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <stack>
 
 using namespace std;
 
@@ -165,7 +166,10 @@ public:
         }
     }
 
+    // Hamilton
 
+
+    // Euler
 
 
 private:
@@ -195,6 +199,8 @@ int main() {
         cout << "11. Recorrido en profundidad" << endl;
         cout << "12. Recorrido en anchura" << endl;
         cout << "13. Recorrido plano" << endl;
+        cout << "14. Camino de Hamilton" << endl;
+        cout << "15. Camino de Euler" << endl;
         cout << "16. Prueba" << endl;
         cout << "0. Salir" << endl;
         cout << "Elija una opción: ";
@@ -277,15 +283,13 @@ int main() {
                 grafo.recorridoPlano();
                 cout << endl;
                 break;
-            
             case 14:
-              
+                
                 break;
-
             case 15:
-               
+                
+                
                 break;
-
             case 16:
                 grafo.agregarNodo("A");
                 grafo.agregarNodo("B");
@@ -293,16 +297,18 @@ int main() {
                 grafo.agregarNodo("D");
                 grafo.agregarNodo("E");
                 grafo.agregarNodo("F");
+                grafo.agregarNodo("G");
 
-                grafo.agregarArista("A","B");
-                grafo.agregarArista("A","C");
-                grafo.agregarArista("A","D");
-                grafo.agregarArista("B","D");
-                grafo.agregarArista("B","C");
-                grafo.agregarArista("C","E");
-                grafo.agregarArista("C","F");
-                grafo.agregarArista("D","E");
-                grafo.agregarArista("D","F");
+                grafo.agregarArista("A", "G");
+                grafo.agregarArista("G", "F");
+                grafo.agregarArista("F", "A");
+                grafo.agregarArista("E", "A");
+                grafo.agregarArista("B", "E");
+                grafo.agregarArista("E", "C");
+                grafo.agregarArista("C", "D");
+                grafo.agregarArista("D", "E");
+
+
 
                 break;
             case 0:

@@ -1,17 +1,19 @@
 #ifndef punto_H
 #define punto_H
 
-#include <iostream>
 #include <string>
 
 class Punto {
 public:
     double x;
     double y;
-    string id;
+    std::string id;
 
-    Punto(double x, double y, string id) : x(x), y(y) , id(id) {}
+    Punto(double x, double y, std::string id);
 };
+
+
+Punto::Punto(double x, double y, std::string id) : x(x), y(y), id(id) {}
 
 
 #endif
