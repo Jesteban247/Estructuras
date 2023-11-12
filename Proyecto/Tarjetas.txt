@@ -1,0 +1,42 @@
+1;Alaska;Infantería
+2;Alberta;Caballería
+3;América Central;Artillería
+4;Estados Unidos Orientales;Infantería
+5;Groenlandia;Caballería
+6;Territorio Noroccidental;Artillería
+7;Ontario;Infantería
+8;Quebec;Caballería
+9;Estados Unidos Occidentales;Artillería
+10;Argentina;Infantería
+11;Brasil;Caballería
+12;Perú;Artillería
+13;Venezuela;Infantería
+14;Gran Bretaña;Caballería
+15;Islandia;Artillería
+16;Europa del Norte;Infantería
+17;Escandinavia;Caballería
+18;Europa del Sur;Artillería
+19;Europa Occidental;Infantería
+20;Ucrania;Caballería
+21;Mongolia;Artillería
+22;Congo;Infantería
+23;África Oriental;Caballería
+24;Egipto;Artillería
+25;Madagascar;Infantería
+26;África del Norte;Caballería
+27;Australia Oriental;Artillería
+28;Indonesia;Infantería
+29;Nueva Guinea;Caballería
+30;Australia Occidental;Artillería
+31;Gran Bretaña;Infantería
+32;Islandia;Caballería
+33;Europa del Norte;Artillería
+34;Escandinavia;Infantería
+35;Europa del Sur;Caballería
+36;Europa Occidental;Artillería
+37;Ucrania;Infantería
+38;Mongolia;Caballería
+39;Siberia;Artillería
+40;China;Infantería
+41;India;Caballería
+42;Irkutsk;Artillería
