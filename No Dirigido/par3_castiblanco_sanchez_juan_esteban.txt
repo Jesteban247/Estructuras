@@ -1,0 +1,41 @@
+DISEÑO
+
+
+TAD CLASE
+Datos mínimos:
+- 
+Operaciones:
+- Se asumen Setters y Getters
+
+
+TAD GRAFO
+Datos mínimos:
+- nodosMap, mapa donde las claves son de un tipo genérico (plantilla) y los valores son enteros, asigna un índice único a cada nodo del grafo para la matriz de adyacencia.
+- nodos, vector de dato tipo plantilla, registro de todos los nodos presentes en el grafo.
+- matrizAdyacencia, vector que almacena un vector de enteros, matriz bidimensional de enteros que representa la adyacencia entre los nodos del grafo.
+Operaciones:
+- 
+
+TAD SISTEMA
+Datos mínimos:
+- classGrafo, Grafo, representa el grafo que almacena la clase
+Operaciones:
+- 
+
+EJEMPLO
+
+TAD VentaVerduras
+Datos mínimos:
+- clasArbol, Arbol, representa el árbol de clasificación que almacena las verduras.
+Operaciones:
+- obtenerClasArbol(), retorna el árbol de clasificación del sistema.
+- fijarClasArbol(narbol), cambia el árbol de clasificación actual del sistema por
+narbol.
+- IniciarSistema(vejemplos), utiliza los ejemplos dados en el contenedor vejemplos
+para construir el árbol de clasificación y almacenar todas las verduras conocidas,
+de acuerdo a sus características básicas y a la estructura del árbol seleccionado.
+- ClasificarVerdura(vpeso,vcolor), utiliza las características dadas de una verdura
+específica para localizar el ejemplo más cercano en el árbol y así utilizar su
+clase para etiquetar la verdura desconocida.
+
+par3_castiblanco_sanchez_juan_esteban.txt
