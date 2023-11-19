@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include "Paises.h"
 #include "Jugador.h"
 #include "ArbolHuffman.h"
@@ -1219,30 +1220,85 @@ int main()
             {
                 if (tokens.size() == 2)
                 {
+
                     string territorio = tokens[1];
+
+                    if (territorio.find('_') != string::npos) 
+                    {
+                        // Reemplazar todos los "_" por espacios
+                        replace(territorio.begin(), territorio.end(), '_', ' ');
+                    }
+                    
                     cout << "Comando 'costo_conquista' ingresado para:" << territorio << endl;
 
-                    Grafo<string> grafo;
-                    //Agregar los nodos
-                    for (int i = 0; i < paises.size(); i++)
+                    //Jugador con turno 1
+                    bool turno = false;
+                    for (int i = 0; i < jugadores.size(); i++)
                     {
-                        grafo.agregarNodo(paises[i].getNombre());
+                            if (jugadores[i].getTurno() == 1)
+                            {
+                                turno = true;
+
+                                cout << "Hola " << jugadores[i].getNombre() << endl;
+
+                                Grafo<string> grafo;
+                                //Agregar los nodos
+                                for (int i = 0; i < paises.size(); i++)
+                                {
+                                    grafo.agregarNodo(paises[i].getNombre());
+                                }
+
+                                //Agregar las aristas
+                                map<int, vector<int>>::iterator it;
+                                for (it = relaciones.begin(); it != relaciones.end(); ++it) 
+                                {
+                                    int nodo = it->first;
+                                    vector<int> vecinos = it->second;
+                                    
+                                    for (int i = 0; i < vecinos.size(); i++)
+                                    {
+                                        int x= vecinos[i];
+                                        grafo.agregarArista(paises[nodo-1].getNombre(), paises[x-1].getNombre(), paises[x-1].getEjercitos());
+                                
+                                    } 
+                                    
+                                }
+
+                                //Agregar paises propios
+                                vector<int> propios;
+                                bool estado = false;
+                                for (int j = 0; j < paises.size(); j++)
+                                {
+                                    if (paises[j].getId_jugador() == jugadores[i].getId())
+                                    {
+                                        propios.push_back(j);
+                                        if (paises[j].getNombre() == territorio)
+                                        {
+                                            estado = true;
+                                        }
+                                    }
+                                }
+
+                                if (estado == true)
+                                {
+                                    cout << "El pais te pertenece" << endl;
+                                }
+
+                                else
+                                {
+                                    grafo.recorridoEnAnchura(territorio, propios);
+                                }
+                                
+                            }
                     }
 
-                    //Agregar las aristas
-                    for (int i = 0; i < relaciones.size(); i++)
+                    if (turno == false)
                     {
-                        vector<int> adyacentes = relaciones[i + 1];
-                        for (int j = 0; j < adyacentes.size(); j++)
-                        {
-                            grafo.agregarArista(paises[i].getNombre(), paises[adyacentes[j] - 1].getNombre(), paises[adyacentes[j] - 1].getEjercitos());
-                        }
+                        cout << "No es tu turno" <<endl;
                     }
 
-                    grafo.imprimirVecinosEntrantes(territorio);
-
-                    
                 }
+
                 else
                 {
                     cout << "Comando 'costo_conquista' incompleto. Debe proporcionar un territorio." << endl;
@@ -1258,13 +1314,108 @@ int main()
                 else
                 {
                     cout << "Comando 'conquista_mas_barata' ingresado." << endl;
+                                        
+                                        
+                    //Jugador con turno 1
+                    bool turno = false;
+                    for (int i = 0; i < jugadores.size(); i++)
+                    {
+                            if (jugadores[i].getTurno() == 1)
+                            {
+                                turno = true;
+
+                                cout << "Hola " << jugadores[i].getNombre() << endl;
+
+                                Grafo<string> grafo;
+                                //Agregar los nodos
+                                for (int i = 0; i < paises.size(); i++)
+                                {
+                                    grafo.agregarNodo(paises[i].getNombre());
+                                }
+
+                                //Agregar las aristas
+                                map<int, vector<int>>::iterator it;
+                                for (it = relaciones.begin(); it != relaciones.end(); ++it) 
+                                {
+                                    int nodo = it->first;
+                                    vector<int> vecinos = it->second;
+                                    
+                                    for (int i = 0; i < vecinos.size(); i++)
+                                    {
+                                        int x= vecinos[i];
+                                        grafo.agregarArista(paises[nodo-1].getNombre(), paises[x-1].getNombre(), paises[x-1].getEjercitos());
+                                
+                                    } 
+                                    
+                                }
+
+                                //Agregar paises propios
+                                vector<int> propios;
+                                vector<int> otros;
+                                for (int j = 0; j < paises.size(); j++)
+                                {
+                                    if (paises[j].getId_jugador() == jugadores[i].getId())
+                                    {
+                                        propios.push_back(j);
+                                    }
+                                    else
+                                    {
+                                        otros.push_back(j);
+                                    }
+                                }
+
+                                //Recorrer todo
+
+                                int pesoMinimo = 10000;
+                                vector<string> caminoMinimo;
+                                string origenMinimo, destinoMinimo;
+
+                                for (int i = 0; i < propios.size(); i++)
+                                {
+                                    for (int j = 0; j < otros.size(); j++)
+                                    {
+                                        vector<string> caminoActual;
+                                        int pesoActual = grafo.FloydWarshall(paises[propios[i]].getNombre(), paises[otros[j]].getNombre(), caminoActual);
+
+                                        if (pesoActual < pesoMinimo) {
+                                            pesoMinimo = pesoActual;
+                                            caminoMinimo = caminoActual;
+                                            origenMinimo = paises[propios[i]].getNombre();
+                                            destinoMinimo = paises[otros[j]].getNombre();
+                                        }
+                                    }
+                                }
+
+                                // Imprimir el camino más corto
+                                if (pesoMinimo != INFINITO) {
+                                    cout << "El camino más corto es desde " << origenMinimo << " hasta " << destinoMinimo << endl;
+                                    cout << " Debe conquistar " << pesoMinimo << " unidades de ejército." <<  endl;
+                                    for (int i = 0; i < caminoMinimo.size() - 1; ++i) {
+                                        cout << caminoMinimo[i] << " --> " << caminoMinimo[i + 1];
+                                        if (i < caminoMinimo.size() - 2) {
+                                            cout << ", ";
+                                        }
+                                    }
+                                    cout << endl;
+                                } 
+                                
+                                else 
+                                {
+                                    cout << "No hay caminos disponibles." << endl;
+                                }
+                                
+                                
+                            }
+                    }
+
+                    if (turno == false)
+                    {
+                        cout << "No es tu turno" <<endl;
+                    }
                 }
             } 
 
-            //Ayuda
 
-            /*
-            
             else if (tokens[0] == "ayuda")
             {
                 if (tokens.size() > 3)
@@ -1321,7 +1472,7 @@ int main()
                 }
             }
             
-            */
+            
 
             //Comprobar
             else
