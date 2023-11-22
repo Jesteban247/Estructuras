@@ -309,6 +309,7 @@ void construir_arbol(string nombreArchivo, string nombreArchivoBinario)
     
 }
 
+/*
 pair< map<int,int>, string > leerBinario(const string& nombreArchivo) 
 {
     ifstream archivo(nombreArchivo, ios::binary);
@@ -339,11 +340,11 @@ pair< map<int,int>, string > leerBinario(const string& nombreArchivo)
         frecuencias[asciiInt] = freqInt;
     }
 
-    /*
-    for (auto& par : frecuencias) {
-        cout << "ascii: " << par.first << ", freq: " << par.second << endl;
-    }
-    */
+    
+    //for (auto& par : frecuencias) {
+      //  cout << "ascii: " << par.first << ", freq: " << par.second << endl;
+    //}
+    
 
     //w
     string w = str.substr(0, 64);
@@ -359,6 +360,40 @@ pair< map<int,int>, string > leerBinario(const string& nombreArchivo)
 
     return make_pair(frecuencias, str);
 }
+*/
+
+pair<map<int, int>, string> leerBinario(const string& nombreArchivo) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    map<int, int> frecuencias;
+    string strCodificada;
+
+    // Leer tamaño de codigoHuffman
+    unsigned long value;
+    archivo.read(reinterpret_cast<char*>(&value), sizeof(value));
+    bitset<16> twoByteRepresentation(value);
+
+    // Leer frecuencias
+    for (size_t i = 0; i < value; ++i) {
+        char ascii;
+        uint64_t freq;
+
+        archivo.read(&ascii, sizeof(ascii));
+        archivo.read(reinterpret_cast<char*>(&freq), sizeof(freq));
+
+        frecuencias[static_cast<int>(ascii)] = freq;
+    }
+
+    // Leer suma total de frecuencias (w)
+    uint64_t w;
+    archivo.read(reinterpret_cast<char*>(&w), sizeof(w));
+
+    // Leer el resto del archivo como código binario
+    strCodificada = string((istreambuf_iterator<char>(archivo)), istreambuf_iterator<char>());
+
+    archivo.close();
+    return make_pair(frecuencias, strCodificada);
+}
+
 
 void cargar_arbol(string nombreArchivo)
 {
@@ -416,7 +451,16 @@ int main()
                     cout << "Bienvenido al juego de Risk" << endl << endl;
                     cout << "Ingrese el numero de jugadores: ";
                     int num_jugadores;
-                    cin >> num_jugadores;
+
+                    do {
+                        cout << "Ingrese el numero de jugadores (entre 2 y 6): ";
+                        cin >> num_jugadores;
+                        
+                        if (num_jugadores < 2 || num_jugadores > 6) {
+                            cout << "El numero de jugadores debe estar entre 2 y 6. Por favor, intente de nuevo." << endl;
+                        }
+                    } while (num_jugadores < 2 || num_jugadores > 6);
+    
                     cout << "--------------------------------" << endl;
 
 
@@ -568,6 +612,8 @@ int main()
                             
                     }
 
+                    cout << "La inicialización se ha realizado satisfactoriamente." << endl;
+
                     cout << endl;
                     //limpiar el buffer
                     cin.ignore();
@@ -576,32 +622,46 @@ int main()
                 else if (tokens.size() == 2)
                 {
                     string nombre_archivo = tokens[1];
-                    //Partir el nombre del archivo por un separador
-                    vector<string> tokens_archivo;
-                    stringstream ss(nombre_archivo);
-                    string token_archivo;
-                    while (getline(ss, token_archivo, '.'))
-                    {
-                        tokens_archivo.push_back(token_archivo);
+
+                    // Validar la extensión del archivo
+                    size_t pos = nombre_archivo.find('.');
+                    if (pos == string::npos) {
+                        cout << "Error: El archivo debe tener una extensión" << endl;
+                        return 1;
                     }
 
-                    if (tokens_archivo[1] == "txt")
-                    {
-                        cout << "Archivo con extension .txt" << endl;
-                        leerPartida(paises, jugadores, nombre_archivo);
+                    string extension = nombre_archivo.substr(pos + 1);
+                    if (extension != "txt" && extension != "bin") {
+                        cout << "Error: El archivo debe tener la extensión .txt o .bin" << endl;
+                        return 1;
                     }
 
-                    else if (tokens_archivo[1] == "bin")
-                    {
-                        cout << "Archivo con extension .bin" << endl;
-                        cargar_arbol(nombre_archivo);
-                        leerPartida(paises, jugadores, "Decodificado.txt");
+                    ifstream archivo(nombre_archivo);
+                    if (!archivo.is_open()) {
+                        cout << "Error: El archivo no existe o está vacío" << endl;
+                        return 1;
                     }
 
-                    else
-                    {
-                        cout << "Comando 'inicializar' mal ejecutado" << endl;
+                    // Verificar que el archivo no esté vacío
+                    if (archivo.peek() == ifstream::traits_type::eof()) {
+                        cout << "Error: El archivo está vacío" << endl;
+                        return 1;
                     }
+
+                    archivo.close();
+
+                    try {
+                        if (extension == "txt") {
+                            leerPartida(paises, jugadores, nombre_archivo);
+                        } else if (extension == "bin") {
+                            cargar_arbol(nombre_archivo);
+                            leerPartida(paises, jugadores, "Decodificado.txt");
+                        }
+                    } catch (runtime_error& e) {
+                        cout << "Error: " << e.what() << endl;
+                    }
+
+                    cout << "Inicialización completada correctamente" << endl;
                     
                 }
 
@@ -853,6 +913,9 @@ int main()
                                                 }
                                             }
 
+                                            if (lista_adyacentes.size() != 0)
+                                            {
+
                                             bool adyacente = false;
 
                                             //Validacion del pais con el vector de adyacentes
@@ -968,6 +1031,13 @@ int main()
                                             {
                                                 cout << "El defensor gano" << endl;
                                                 paises[id_pais - 1].setEjercitos(paises[id_pais - 1].getEjercitos() - 1);
+                                            }
+                                            
+                                            }
+
+                                            else
+                                            {
+                                                cout << "No hay paises disponibles" << endl;
                                             }
 
                                             cout << "Quieres atacar?" << endl;
@@ -1139,6 +1209,27 @@ int main()
                                     
                                     cout << "--------------------------------" << endl;
 
+                                    int cont=0;
+                                    for (int j = 0; j < paises.size(); j++)
+                                    {
+                                        if (paises[j].getEstado() == 1 && paises[j].getId_jugador() == jugadores[i].getId())
+                                        {
+                                            cout << paises[j].getId() << ". " << paises[j].getNombre() << " (" << paises[j].getEjercitos() << ")" << endl;
+                                            cont ++;
+                                        }
+                                    }
+
+                                    if (cont == 42)
+                                    {
+                                        cout << "Jugador: " << jugadores[i].getNombre() << " Haz ganado" << endl;
+                                    }
+                                    else
+                                    {
+                                        cout << "Jugador: " << jugadores[i].getNombre() << " No ganas aún" << endl;
+                                    }
+                                    cout << "--------------------------------" << endl;
+
+
                                     //limpiar el buffer
                                     cin.ignore();
                                     
@@ -1188,12 +1279,35 @@ int main()
             {
                 if (tokens.size() == 2)
                 {
-                    //Guardar la informacion de la partida
-                    guardar(paises, jugadores, tokens[1]);
+                    string nombreArchivo = tokens[1];
+
+                     // Validar la extensión del archivo
+                    size_t pos = nombreArchivo.find('.');
+                    if (pos == string::npos) {
+                        cout << "Error: El archivo debe tener una extensión" << endl;
+                    } 
+                    
+                    else 
+                    {
+                        string extension = nombreArchivo.substr(pos + 1);
+                        if (extension != "txt") {
+                            cout << "Error: El archivo debe tener la extensión .txt" << endl;
+                        } 
+                        else {
+                            // Llamar a la función guardar si la extensión es correcta
+                            guardar(paises, jugadores, nombreArchivo);
+                            cout << "La partida ha sido guardada correctamente" << endl;
+                        }
+                    }
+
+                    
+
                 }
+
+                
                 else
                 {
-                    cout << "Comando 'guardar' incompleto. Debe proporcionar un archivo." << endl;
+                    cout << "Comando 'guardar' incompleto. Debe proporcionar el nombre de un archivo." << endl;
                 }
             }
 
@@ -1201,9 +1315,30 @@ int main()
             {
                 if (tokens.size() == 2)
                 {
-                    //Guardar la informacion de la partida
-                    guardar(paises, jugadores, "Alterno.txt");
-                    construir_arbol("Alterno.txt", tokens[1]);
+
+                    string nombreArchivo = tokens[1];
+
+                     // Validar la extensión del archivo
+                    size_t pos = nombreArchivo.find('.');
+                    if (pos == string::npos) {
+                        cout << "Error: El archivo debe tener una extensión" << endl;
+                    } 
+                    
+                    else 
+                    {
+                        string extension = nombreArchivo.substr(pos + 1);
+                        if (extension != "bin") {
+                            cout << "Error: El archivo debe tener la extensión .bin" << endl;
+                        } 
+                        else {
+                            //Guardar la informacion de la partida
+                            guardar(paises, jugadores, "Alterno.txt");
+                            construir_arbol("Alterno.txt", tokens[1]);
+                        }
+                    }
+
+
+                    
 
                 }
                 else
@@ -1231,70 +1366,88 @@ int main()
                     
                     cout << "Comando 'costo_conquista' ingresado para:" << territorio << endl;
 
-                    //Jugador con turno 1
-                    bool turno = false;
-                    for (int i = 0; i < jugadores.size(); i++)
+                    bool esta= false;
+
+                    for (int j = 0; j < paises.size(); j++)
                     {
-                            if (jugadores[i].getTurno() == 1)
-                            {
-                                turno = true;
-
-                                cout << "Hola " << jugadores[i].getNombre() << endl;
-
-                                Grafo<string> grafo;
-                                //Agregar los nodos
-                                for (int i = 0; i < paises.size(); i++)
-                                {
-                                    grafo.agregarNodo(paises[i].getNombre());
-                                }
-
-                                //Agregar las aristas
-                                map<int, vector<int>>::iterator it;
-                                for (it = relaciones.begin(); it != relaciones.end(); ++it) 
-                                {
-                                    int nodo = it->first;
-                                    vector<int> vecinos = it->second;
-                                    
-                                    for (int i = 0; i < vecinos.size(); i++)
-                                    {
-                                        int x= vecinos[i];
-                                        grafo.agregarArista(paises[nodo-1].getNombre(), paises[x-1].getNombre(), paises[x-1].getEjercitos());
-                                
-                                    } 
-                                    
-                                }
-
-                                //Agregar paises propios
-                                vector<int> propios;
-                                bool estado = false;
-                                for (int j = 0; j < paises.size(); j++)
-                                {
-                                    if (paises[j].getId_jugador() == jugadores[i].getId())
-                                    {
-                                        propios.push_back(j);
-                                        if (paises[j].getNombre() == territorio)
-                                        {
-                                            estado = true;
-                                        }
-                                    }
-                                }
-
-                                if (estado == true)
-                                {
-                                    cout << "El pais te pertenece" << endl;
-                                }
-
-                                else
-                                {
-                                    grafo.recorridoEnAnchura(territorio, propios);
-                                }
-                                
-                            }
+                        if (paises[j].getNombre() == territorio)
+                        {
+                            esta= true;
+                        }
                     }
 
-                    if (turno == false)
+                    if (esta == false)
                     {
-                        cout << "No es tu turno" <<endl;
+                        cout << "El país no existe o digito mal" << endl;                    
+                    }
+
+                    else
+                    {
+                        //Jugador con turno 1
+                        bool turno = false;
+                        for (int i = 0; i < jugadores.size(); i++)
+                        {
+                                if (jugadores[i].getTurno() == 1)
+                                {
+                                    turno = true;
+
+                                    cout << "Hola " << jugadores[i].getNombre() << endl;
+
+                                    Grafo<string> grafo;
+                                    //Agregar los nodos
+                                    for (int i = 0; i < paises.size(); i++)
+                                    {
+                                        grafo.agregarNodo(paises[i].getNombre());
+                                    }
+
+                                    //Agregar las aristas
+                                    map<int, vector<int>>::iterator it;
+                                    for (it = relaciones.begin(); it != relaciones.end(); ++it) 
+                                    {
+                                        int nodo = it->first;
+                                        vector<int> vecinos = it->second;
+                                        
+                                        for (int i = 0; i < vecinos.size(); i++)
+                                        {
+                                            int x= vecinos[i];
+                                            grafo.agregarArista(paises[nodo-1].getNombre(), paises[x-1].getNombre(), paises[x-1].getEjercitos());
+                                    
+                                        } 
+                                        
+                                    }
+
+                                    //Agregar paises propios
+                                    vector<int> propios;
+                                    bool estado = false;
+                                    for (int j = 0; j < paises.size(); j++)
+                                    {
+                                        if (paises[j].getId_jugador() == jugadores[i].getId())
+                                        {
+                                            propios.push_back(j);
+                                            if (paises[j].getNombre() == territorio)
+                                            {
+                                                estado = true;
+                                            }
+                                        }
+                                    }
+
+                                    if (estado == true)
+                                    {
+                                        cout << "El pais te pertenece" << endl;
+                                    }
+
+                                    else
+                                    {
+                                        grafo.recorridoEnAnchura(territorio, propios);
+                                    }
+                                    
+                                }
+                        }
+
+                        if (turno == false)
+                        {
+                            cout << "No es tu turno" <<endl;
+                        }
                     }
 
                 }
@@ -1415,6 +1568,7 @@ int main()
                 }
             } 
 
+            //Ayuda
 
             else if (tokens[0] == "ayuda")
             {

@@ -20,7 +20,6 @@ class Jugador
         //Constructores
         Jugador();
         Jugador(string nombre,int turno, int id, int tropas);
-        //Destructor
         ~Jugador();
         //Getters
         string getNombre();

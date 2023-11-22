@@ -108,6 +108,8 @@ bool ArbolHuffman::esHoja(Nodo* raiz) {
 
 
 // Implementación de guardarEnArchivoBinario
+
+/*
 void ArbolHuffman::guardarEnArchivoBinario(const string& strCodificada, const string& nombreArchivo) {
     
     //n
@@ -143,6 +145,38 @@ void ArbolHuffman::guardarEnArchivoBinario(const string& strCodificada, const st
 
 }
 
+*/
+
+void ArbolHuffman::guardarEnArchivoBinario(const string& strCodificada, const string& nombreArchivo) {
+    ofstream archivo(nombreArchivo, ios::binary);
+
+    // Escribir el tamaño de codigoHuffman
+    int value = codigoHuffman.size();
+    bitset<16> twoByteRepresentation(value);
+    unsigned long val = twoByteRepresentation.to_ulong();
+    archivo.write(reinterpret_cast<const char*>(&val), sizeof(val));
+
+    // Escribir las frecuencias
+    for (auto& par : frecuencias) {
+        char ascii = par.first;
+        archivo.write(&ascii, sizeof(ascii));
+
+        uint64_t freq = par.second;
+        archivo.write(reinterpret_cast<const char*>(&freq), sizeof(freq));
+    }
+
+    // Escribir la suma total de frecuencias
+    uint64_t sum = 0;
+    for (auto& par : frecuencias) {
+        sum += par.second;
+    }
+    archivo.write(reinterpret_cast<const char*>(&sum), sizeof(sum));
+
+    // Escribir el código binario
+    archivo.write(strCodificada.c_str(), strCodificada.size());
+
+    archivo.close();
+}
 
 // Implementación de reconstruirArbol
 void ArbolHuffman::reconstruirArbol(const map<int, int>& frecuencias) {

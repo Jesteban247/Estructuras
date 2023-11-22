@@ -20,7 +20,6 @@ class Paises
         //Constructores
         Paises();
         Paises(int id, string continente, string nombre, int estado, int id_jugador, int ejercitos);
-        //Destructor
         ~Paises();
         //Getters
         int getId();
